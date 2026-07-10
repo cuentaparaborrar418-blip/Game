@@ -711,7 +711,7 @@
             }
         }
 
-        function loop() { updateGame(); draw(); updateCooldownsUI(); requestAnimationFrame(loop); }
+         function loop() { updateGame(); draw(); updateCooldownsUI(); requestAnimationFrame(loop); }
 
         window.onload = () => {
             currentMap = MAPS[0];
@@ -726,29 +726,31 @@
             // CONTROL AUTOMÁTICO DE LA MÚSICA DEL LOBBY (Lobby.mp3)
             // =========================================================
 
-            // 1. INICIAR: Suena al primer clic que haga el jugador dentro del Lobby
+            // 1. INICIAR: Despierta el motor de audio del juego y reproduce el Lobby al primer clic
             document.addEventListener('click', () => {
                 const lobby = document.getElementById('lobby-screen');
                 if (lobby && !lobby.classList.contains('hidden')) {
+                    // Despertamos el AudioContext del juego usando tu lógica original
+                    if (typeof audioCtx !== 'undefined' && audioCtx.state === 'suspended') {
+                        audioCtx.resume();
+                    }
+                    // Ejecutamos la pista del lobby
                     if (typeof playLobbyTrack === 'function') {
                         playLobbyTrack();
                     }
                 }
             }, { once: true });
 
-            // Función interna para pausar y reiniciar el track del lobby
-            function apagarMusicaLobby() {
-                if (typeof lobbyTrackEl !== 'undefined' && lobbyTrackEl) {
-                    lobbyTrackEl.pause();
-                    lobbyTrackEl.currentTime = 0; // Lo deja listo en el segundo 0
+            // 2. PARAR: Limpia y detiene todas las canciones del menú cuando eligen bando para jugar
+            function apagarMusicaMenu() {
+                if (typeof stopAllRealTracks === 'function') {
+                    stopAllRealTracks(); // Función nativa de tu audio.js para apagar todo
                 }
             }
+            document.getElementById('menu-survivor')?.addEventListener('click', apagarMusicaMenu);
+            document.getElementById('menu-killer')?.addEventListener('click', apagarMusicaMenu);
 
-            // 2. PARAR: Se apaga inmediatamente cuando eligen bando para jugar
-            document.getElementById('menu-survivor')?.addEventListener('click', apagarMusicaLobby);
-            document.getElementById('menu-killer')?.addEventListener('click', apagarMusicaLobby);
-
-            // 3. REPETIR: Vuelve a encenderse cuando hacen clic en "Volver al Lobby"
+            // 3. REPETIR: Vuelve a encenderse cuando regresan de la partida haciendo clic en "Volver al Lobby"
             document.getElementById('btn-play-again')?.addEventListener('click', () => {
                 if (typeof playLobbyTrack === 'function') {
                     playLobbyTrack();
@@ -756,7 +758,7 @@
             });
 
             // =========================================================
-            // INICIO DEL LOOP (Debe ir al final para no bloquear los eventos)
+            // INICIO DEL LOOP
             // =========================================================
             loop(); 
         };
