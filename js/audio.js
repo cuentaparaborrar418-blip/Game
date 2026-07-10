@@ -157,7 +157,7 @@
 
         // Preload the LMS track (Golf Ball's) purely to compute the dynamic LMS timer duration,
         // independent of which character ends up in LMS mode.
-        loadAudioWithFallback(['Game/audio/GolfballLms.mp3'], (el) => {
+        loadAudioWithFallback(['audio/GolfballLms.mp3'], (el) => {
             if (el && el.duration && isFinite(el.duration)) {
                 lmsTimerSeconds = Math.max(30, Math.round(el.duration - LMS_NEGATIVE_OFFSET));
             }
