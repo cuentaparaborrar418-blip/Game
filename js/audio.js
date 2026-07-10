@@ -170,7 +170,7 @@
 
             const capName = CHAR_AUDIO_NAME[characterId] || 'Golfball';
             const candidates = [`audio/${capName}Lms.mp3`];
-            if (capName !== 'Golfball') candidates.push('Game/audio/GolfballLms.mp3');
+            if (capName !== 'Golfball') candidates.push('audio/GolfballLms.mp3');
 
             lmsTrackEl = loadAudioWithFallback(candidates, (el) => {
                 if (!el) return; // no file worked at all -> silence, per design (no synth fallback for LMS)
@@ -184,7 +184,7 @@
 
         function startChaseTheme(characterId) {
             const capName = CHAR_AUDIO_NAME[characterId] || 'Golfball';
-            chaseTrackEl = loadAudioWithFallback([`Game/audio/Mecha-${capName}ChTh.mp3`], (el) => {
+            chaseTrackEl = loadAudioWithFallback([`audio/Mecha-${capName}ChTh.mp3`], (el) => {
                 if (el) { chaseTrackEl = el; el.loop = true; el.volume = 0; }
             });
         }
@@ -204,13 +204,13 @@
         }
 
         function playSoloWinTrack() {
-            soloWinTrackEl = loadAudioWithFallback(['Game/audio/SoloWin.mp3'], (el) => {
+            soloWinTrackEl = loadAudioWithFallback(['audio/SoloWin.mp3'], (el) => {
                 if (el) { el.volume = globalVolume; el.play().catch(() => {}); }
             });
         }
 
         function playEndScreenTrack(capSeconds) {
-            endScreenTrackEl = loadAudioWithFallback(['Game/audio/EndScreen.mp3'], (el) => {
+            endScreenTrackEl = loadAudioWithFallback(['audio/EndScreen.mp3'], (el) => {
                 if (!el) return;
                 el.volume = globalVolume;
                 el.play().catch(() => {});
