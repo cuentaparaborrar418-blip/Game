@@ -713,47 +713,48 @@
 
         function loop() { updateGame(); draw(); updateCooldownsUI(); requestAnimationFrame(loop); }
 
-
-        window.onload = () => {
+window.onload = () => {
             currentMap = MAPS[0];
             WORLD_WIDTH = currentMap.WORLD_WIDTH; WORLD_HEIGHT = currentMap.WORLD_HEIGHT;
             platforms = currentMap.platforms.map(p => ({ ...p }));
             player = { x: 300, y: WORLD_HEIGHT - 120, r: 20, vy: 0, vx: 0, name: "Menú", state: 'NORMAL', hatStyle: HAT_TYPES[0], abilities: [] };
             killer = { x: WORLD_WIDTH - 200, y: WORLD_HEIGHT - 120, r: 26, vy: 0, vx: 0, name: "Killer", hatStyle: null, abilities: [] };
-            playLobbyTrack();
-        resizeCanvas();
+            
+            resizeCanvas();
             loop();
+
+            // =========================================================
+            // CONTROL AUTOMÁTICO DE LA MÚSICA DEL LOBBY (Lobby.mp3)
+            // =========================================================
+
+            // 1. INICIAR: Suena al primer clic que haga el jugador dentro del Lobby
+            document.addEventListener('click', () => {
+                const lobby = document.getElementById('lobby-screen');
+                if (lobby && !lobby.classList.contains('hidden')) {
+                    if (typeof playLobbyTrack === 'function') {
+                        playLobbyTrack();
+                    }
+                }
+            }, { once: true });
+
+            // Función interna para pausar y reiniciar el track del lobby
+            function apagarMusicaLobby() {
+                if (typeof lobbyTrackEl !== 'undefined' && lobbyTrackEl) {
+                    lobbyTrackEl.pause();
+                    lobbyTrackEl.currentTime = 0; // Lo deja listo en el segundo 0
+                }
+            }
+
+            // 2. PARAR: Se apaga inmediatamente cuando eligen bando para jugar
+            document.getElementById('menu-survivor')?.addEventListener('click', apagarMusicaLobby);
+            document.getElementById('menu-killer')?.addEventListener('click', apagarMusicaLobby);
+
+            // 3. REPETIR: Vuelve a encenderse cuando hacen clic en "Volver al Lobby"
+            document.getElementById('btn-play-again')?.addEventListener('click', () => {
+                if (typeof playLobbyTrack === 'function') {
+                    playLobbyTrack();
+                }
+            });
         };
-// =========================================================
-// CONTROL AUTOMÁTICO DE LA MÚSICA DEL LOBBY (Lobby.mp3)
-// =========================================================
 
-// 1. INICIAR: Suena al entrar al juego (espera al primer clic por políticas del navegador)
-document.addEventListener('click', () => {
-    const lobby = document.getElementById('lobby-screen');
-    // Si el lobby está visible, activa la música
-    if (lobby && !lobby.classList.contains('hidden')) {
-        if (typeof playLobbyTrack === 'function') {
-            playLobbyTrack();
-        }
-    }
-}, { once: true }); // 'once: true' asegura que este detector se borre tras el primer clic
-
-// Función rápida para pausar y reiniciar el track del lobby
-function apagarMusicaLobby() {
-    if (typeof lobbyTrackEl !== 'undefined' && lobbyTrackEl) {
-        lobbyTrackEl.pause();
-        lobbyTrackEl.currentTime = 0; // Lo deja listo en el segundo 0
-    }
-}
-
-// 2. PARAR: Se apaga inmediatamente cuando eligen bando para jugar
-document.getElementById('menu-survivor')?.addEventListener('click', apagarMusicaLobby);
-document.getElementById('menu-killer')?.addEventListener('click', apagarMusicaLobby);
-
-// 3. REPETIR: Vuelve a encenderse cuando hacen clic en "Volver al Lobby"
-document.getElementById('btn-play-again')?.addEventListener('click', () => {
-    if (typeof playLobbyTrack === 'function') {
-        playLobbyTrack();
-    }
-});
+        
