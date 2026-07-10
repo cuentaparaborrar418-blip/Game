@@ -99,7 +99,15 @@
                 if (utilityAbility && utilityAbility.cd <= 0 && s.onGround && s.buildingSpeedpadTimer <= 0 && Math.random() < 0.03) { utilityAbility.activate(s); utilityAbility.cd = utilityAbility.maxCd; }
             }
 
-            if (goal.pos && goal.pos.y !== undefined && goal.pos.y < s.y - 50 && s.onGround && Math.random() < 0.07) s.vy = -s.jumpPower;
+            if (goal.pos // --- SALTO EVASIVO SI ESTÁ ACORRALADA EN LA ORILLA ---
+            if (goal.type === 'FLEE' && s.isDesperateEscape && s.onGround && distToKiller < 180) {
+                s.vy = -s.jumpPower * 1.15; // Un salto un poco más alto para superar la colisión del Killer
+                s.isDesperateEscape = false; // Consumimos la bandera de emergencia
+            } 
+            // Salto normal del mapa para subir plataformas
+            else if (goal.pos && goal.pos.y !== undefined && goal.pos.y < s.y - 50 && s.onGround && Math.random() < 0.07) {
+                s.vy = -s.jumpPower;
+            }
 
             let currentSpeed = s.speed;
             if (s.speedBoostTimer > 0) { currentSpeed *= 2.3; s.speedBoostTimer--; }
