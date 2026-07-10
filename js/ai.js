@@ -27,11 +27,34 @@
                 escapeRings.forEach(r => { const rd = Math.hypot(r.x - s.x, r.y - s.y); if (rd < minRingDist) { minRingDist = rd; nearestRing = r; } });
                 if (nearestRing) options.push({ type: 'ESCAPE', weight: 100, pos: nearestRing });
             }
+// --- NUEVA LÓGICA DE ESCAPE RACIONAL (EVITA QUEDAR ACORRALADO EN BORDES) ---
+            if (distToKiller < 320) {
+                let targetX = s.x + (s.x > killerCoords.x ? 400 : -400);
+                
+                // Si huir hacia el lado lógico la estampa contra los límites del mapa (Margen de 100px)
+                const cercaBordeIzquierdo = s.x < 100 && killerCoords.x > s.x;
+                const cercaBordeDerecho = s.x > (WORLD_WIDTH - 100) && killerCoords.x < s.x;
+                
+                if (cercaBordeIzquierdo || cercaBordeDerecho) {
+                    // ¡Está acorralada! En vez de morir contra la pared, corre hacia el Killer para saltarlo
+                    targetX = killerCoords.x + (cercaBordeIzquierdo ? 300 : -300);
+                    s.isDesperateEscape = true;
+                } else {
+                    s.isDesperateEscape = false;
+                }
 
-            if (distToKiller < 320) options.push({ type: 'FLEE', weight: (60 - distToKiller / 6) * archMult.flee, pos: { x: s.x + (s.x > killerCoords.x ? 400 : -400), y: s.y } });
+                options.push({ type: 'FLEE', weight: (60 - distToKiller / 6) * archMult.flee, pos: { x: targetX, y: s.y } });
+            } else {
+                s.isDesperateEscape = false;
+            }
+
             if (downedAlly) options.push({ type: 'RESCUE', weight: 45 * archMult.rescue, pos: downedAlly });
-            if (s.heldItem === 'medkit' && s.health < 55 && distToKiller > 260) options.push({ type: 'HEAL', weight: 40 * archMult.heal, pos: { x: s.x, y: s.y } });
-            if (!s.heldItem && nearestItem && nearestItem.dist < 550) options.push({ type: 'ITEM_FETCH', weight: 22 * archMult.fetch, pos: nearestItem.pos });
+            
+            // --- CURACIÓN RACIONAL: Sube de 260 a 550 unidades de distancia de seguridad ---
+            if (s.heldItem === 'medkit' && s.health < 55 && distToKiller > 550) {
+                options.push({ type: 'HEAL', weight: 40 * archMult.heal, pos: { x: s.x, y: s.y } });
+            }
+              if (!s.heldItem && nearestItem && nearestItem.dist < 550) options.push({ type: 'ITEM_FETCH', weight: 22 * archMult.fetch, pos: nearestItem.pos });
             if (s.heldItem && lowHealthAlly) options.push({ type: 'GIVE_ITEM', weight: 26 * archMult.give, pos: lowHealthAlly });
 
             options.push({ type: 'PATROL', weight: 8, pos: { x: s.patrolTargetX, y: s.y } });
