@@ -1,4 +1,4 @@
-        function decideSurvivorGoal(s) {
+function decideSurvivorGoal(s) {
             const killerCoords = getKillerCoords();
             const distToKiller = Math.hypot(killerCoords.x - s.x, killerCoords.y - s.y);
             const allTeam = currentRole === 'survivor' ? survivors.concat([player]) : survivors;
@@ -27,16 +27,17 @@
                 escapeRings.forEach(r => { const rd = Math.hypot(r.x - s.x, r.y - s.y); if (rd < minRingDist) { minRingDist = rd; nearestRing = r; } });
                 if (nearestRing) options.push({ type: 'ESCAPE', weight: 100, pos: nearestRing });
             }
-// --- NUEVA LÓGICA DE ESCAPE RACIONAL (EVITA QUEDAR ACORRALADO EN BORDES) ---
+
+            // --- LÓGICA DE ESCAPE EN BORDES (EVITA QUEDAR ACORRALADO) ---
             if (distToKiller < 320) {
                 let targetX = s.x + (s.x > killerCoords.x ? 400 : -400);
                 
-                // Si huir hacia el lado lógico la estampa contra los límites del mapa (Margen de 100px)
+                // Margen de 100px para detectar límites del mapa mundial
                 const cercaBordeIzquierdo = s.x < 100 && killerCoords.x > s.x;
                 const cercaBordeDerecho = s.x > (WORLD_WIDTH - 100) && killerCoords.x < s.x;
                 
                 if (cercaBordeIzquierdo || cercaBordeDerecho) {
-                    // ¡Está acorralada! En vez de morir contra la pared, corre hacia el Killer para saltarlo
+                    // Si está acorralado, avanza hacia el Killer para intentar saltarlo
                     targetX = killerCoords.x + (cercaBordeIzquierdo ? 300 : -300);
                     s.isDesperateEscape = true;
                 } else {
@@ -50,11 +51,12 @@
 
             if (downedAlly) options.push({ type: 'RESCUE', weight: 45 * archMult.rescue, pos: downedAlly });
             
-            // --- CURACIÓN RACIONAL: Sube de 260 a 550 unidades de distancia de seguridad ---
+            // --- SEGURIDAD AL CURARSE: Sube de 260 a 550 para evitar bucles absurdos ---
             if (s.heldItem === 'medkit' && s.health < 55 && distToKiller > 550) {
                 options.push({ type: 'HEAL', weight: 40 * archMult.heal, pos: { x: s.x, y: s.y } });
             }
-              if (!s.heldItem && nearestItem && nearestItem.dist < 550) options.push({ type: 'ITEM_FETCH', weight: 22 * archMult.fetch, pos: nearestItem.pos });
+
+            if (!s.heldItem && nearestItem && nearestItem.dist < 550) options.push({ type: 'ITEM_FETCH', weight: 22 * archMult.fetch, pos: nearestItem.pos });
             if (s.heldItem && lowHealthAlly) options.push({ type: 'GIVE_ITEM', weight: 26 * archMult.give, pos: lowHealthAlly });
 
             options.push({ type: 'PATROL', weight: 8, pos: { x: s.patrolTargetX, y: s.y } });
@@ -99,9 +101,9 @@
                 if (utilityAbility && utilityAbility.cd <= 0 && s.onGround && s.buildingSpeedpadTimer <= 0 && Math.random() < 0.03) { utilityAbility.activate(s); utilityAbility.cd = utilityAbility.maxCd; }
             }
 
-            if (goal.pos // --- SALTO EVASIVO SI ESTÁ ACORRALADA EN LA ORILLA ---
+            // --- LÓGICA DE SALTO REPARADA Y OPTIMIZADA ---
             if (goal.type === 'FLEE' && s.isDesperateEscape && s.onGround && distToKiller < 180) {
-                s.vy = -s.jumpPower * 1.15; // Un salto un poco más alto para superar la colisión del Killer
+                s.vy = -s.jumpPower * 1.15; // Salto evasivo potenciado para superar la colisión del Killer
                 s.isDesperateEscape = false; // Consumimos la bandera de emergencia
             } 
             // Salto normal del mapa para subir plataformas
@@ -259,5 +261,4 @@
 
                 s.x = Math.max(s.r, Math.min(WORLD_WIDTH - s.r, s.x));
             });
-        }
-
+                        }
