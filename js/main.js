@@ -724,3 +724,36 @@
         resizeCanvas();
             loop();
         };
+// =========================================================
+// CONTROL AUTOMÁTICO DE LA MÚSICA DEL LOBBY (Lobby.mp3)
+// =========================================================
+
+// 1. INICIAR: Suena al entrar al juego (espera al primer clic por políticas del navegador)
+document.addEventListener('click', () => {
+    const lobby = document.getElementById('lobby-screen');
+    // Si el lobby está visible, activa la música
+    if (lobby && !lobby.classList.contains('hidden')) {
+        if (typeof playLobbyTrack === 'function') {
+            playLobbyTrack();
+        }
+    }
+}, { once: true }); // 'once: true' asegura que este detector se borre tras el primer clic
+
+// Función rápida para pausar y reiniciar el track del lobby
+function apagarMusicaLobby() {
+    if (typeof lobbyTrackEl !== 'undefined' && lobbyTrackEl) {
+        lobbyTrackEl.pause();
+        lobbyTrackEl.currentTime = 0; // Lo deja listo en el segundo 0
+    }
+}
+
+// 2. PARAR: Se apaga inmediatamente cuando eligen bando para jugar
+document.getElementById('menu-survivor')?.addEventListener('click', apagarMusicaLobby);
+document.getElementById('menu-killer')?.addEventListener('click', apagarMusicaLobby);
+
+// 3. REPETIR: Vuelve a encenderse cuando hacen clic en "Volver al Lobby"
+document.getElementById('btn-play-again')?.addEventListener('click', () => {
+    if (typeof playLobbyTrack === 'function') {
+        playLobbyTrack();
+    }
+});
