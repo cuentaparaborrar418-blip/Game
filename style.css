@@ -1,0 +1,16 @@
+        html { font-size: clamp(13px, 1.1vw + 0.6vh, 18px); }
+        body { touch-action: none; -webkit-user-select: none; user-select: none; background-color: #050811; }
+        canvas { display: block; image-rendering: pixelated; }
+        .char-portrait-canvas { width: 64px; height: 64px; }
+
+        #game-container { width: min(100vw, 100vh * 16 / 10); height: min(100vh, 100vw * 10 / 16); }
+
+        @media (max-width: 480px), (max-height: 480px) {
+            html { font-size: clamp(11px, 1.4vw + 0.8vh, 15px); }
+            #mobile-controls-container #joystick-zone { width: 25vw; height: 25vw; max-width: 110px; max-height: 110px; }
+            #mobile-right-panel { width: 45vw; height: 45vw; max-width: 190px; max-height: 190px; }
+        }
+
+        @media (orientation: landscape) and (max-height: 420px) {
+            #game-hud-header { padding-top: 2px; padding-bottom: 2px; }
+        }

@@ -1,0 +1,3425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Golf Ball Factory: Asymmetric Survival (Ultimate Edition)</title>
+    <!-- Tailwind CSS para diseño fluido de la interfaz -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+            background-color: #050811;
+        }
+        canvas {
+            display: block;
+            image-rendering: pixelated;
+        }
+    </style>
+</head>
+<body class="text-white overflow-hidden w-full h-screen flex flex-col items-center justify-center font-sans">
+
+    <!-- MENÚ DE SELECCIÓN DE BANDO Y LOBBY PRINCIPAL -->
+    <div id="lobby-screen" class="absolute inset-0 bg-slate-950 z-30 flex flex-col items-center justify-center p-4 md:p-6 text-center overflow-y-auto transition-all duration-300">
+        <h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400 mb-1 tracking-wider animate-pulse">
+            GOLF BALL FACTORY
+        </h1>
+        <p class="text-xs text-slate-400 max-w-lg mb-4 font-mono">
+            Simulador de supervivencia asimétrica lateral 2D. Escapa de la versión mecanizada o asimila a los supervivientes usando intelecto cibernético y parkour.
+        </p>
+
+        <!-- SECCIÓN DE SELECCIÓN DE PERSONAJE -->
+        <div class="flex flex-col sm:flex-row gap-4 mb-5 w-full max-w-2xl">
+            <!-- Tarjeta Survivor (Golf Ball) -->
+            <button id="select-survivor" class="flex-1 bg-slate-900/90 hover:bg-slate-850 border-2 border-emerald-500/50 hover:border-emerald-400 p-4 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] flex flex-col items-center group relative overflow-hidden">
+                <div class="absolute top-2 right-2 bg-emerald-950/80 border border-emerald-500/35 px-2 py-0.5 rounded text-[8px] font-mono font-bold text-emerald-400">JUGABLE</div>
+                
+                <!-- Vista Previa de Golf Ball (CSS/HTML) -->
+                <div class="w-20 h-20 bg-slate-950 rounded-full border border-slate-800 flex items-center justify-center mb-2 shadow-inner relative">
+                    <!-- Golf Ball de exhibición -->
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-white to-slate-400 border-2 border-slate-700 flex items-center justify-center relative">
+                        <div class="absolute top-1 left-2 w-1.5 h-1.5 bg-slate-400 rounded-full"></div>
+                        <div class="absolute bottom-2 right-3 w-1.5 h-1.5 bg-slate-400 rounded-full"></div>
+                        <!-- Ojos BFDI -->
+                        <div class="w-1 h-3.5 bg-black rounded-full mx-1"></div>
+                        <div class="w-1 h-3.5 bg-black rounded-full mx-1"></div>
+                        <!-- Corona opcional -->
+                        <div class="absolute -top-3 text-[14px]">👑</div>
+                    </div>
+                </div>
+
+                <h3 class="text-md font-bold text-emerald-400">GOLF BALL</h3>
+                <span class="text-[9px] font-black text-slate-500 font-mono tracking-widest uppercase">BANDO SOBREVIVIENTE</span>
+                <p class="text-[10px] text-slate-400 font-mono mt-2 text-center leading-relaxed">
+                    Construye speedpads, rastrea al asesino y salta alto. Cuenta con la pasiva exclusiva de onda expansiva electromagnética.
+                </p>
+            </button>
+
+            <!-- Tarjeta Killer (Mecha Golf Ball) -->
+            <button id="select-killer" class="flex-1 bg-slate-900/90 hover:bg-slate-850 border-2 border-red-500/50 hover:border-red-400 p-4 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] flex flex-col items-center group relative overflow-hidden">
+                <div class="absolute top-2 right-2 bg-red-950/80 border border-red-500/35 px-2 py-0.5 rounded text-[8px] font-mono font-bold text-red-400">JUGABLE</div>
+
+                <!-- Vista Previa de Mecha Golf Ball (CSS/HTML) -->
+                <div class="w-20 h-20 bg-slate-950 rounded-full border border-slate-800 flex items-center justify-center mb-2 shadow-inner relative">
+                    <!-- Mecha de exhibición -->
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 border-2 border-slate-800 flex items-center justify-center relative">
+                        <div class="absolute -top-3 w-1 h-4 bg-slate-600 flex items-center justify-center">
+                            <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                        </div>
+                        <!-- Ojos Visor Neón -->
+                        <div class="w-2.5 h-4 bg-red-950 border border-red-500 rounded-full mx-0.5 flex items-center justify-center"><div class="w-1 h-2 bg-red-500 rounded-full"></div></div>
+                        <div class="w-2.5 h-4 bg-red-950 border border-red-500 rounded-full mx-0.5 flex items-center justify-center"><div class="w-1 h-2 bg-red-500 rounded-full"></div></div>
+                    </div>
+                </div>
+
+                <h3 class="text-md font-bold text-red-400">MECHA GOLF BALL</h3>
+                <span class="text-[9px] font-black text-slate-500 font-mono tracking-widest uppercase">BANDO ASESINO</span>
+                <p class="text-[10px] text-slate-400 font-mono mt-2 text-center leading-relaxed">
+                    Armamento pesado. Cañón térmico auto-teledirigido, despliegue de drones de rastreo térmico y escáner de calor global.
+                </p>
+            </button>
+        </div>
+
+        <!-- BOTONES DE CONFIGURACIÓN Y BIO -->
+        <div class="flex flex-wrap justify-center gap-3 mb-5 max-w-xl">
+            <button id="btn-open-bio" class="bg-gradient-to-r from-slate-900 to-slate-950 border border-slate-700 hover:border-emerald-500 text-emerald-400 px-4 py-2 rounded-xl font-bold font-mono text-xs flex items-center gap-2 shadow-lg active:scale-95 transition-all duration-150">
+                <span>📖</span> INVESTIGAR BIOGRAFÍAS Y SKILLS
+            </button>
+
+            <button id="btn-open-settings" class="bg-gradient-to-r from-slate-900 to-slate-950 border border-slate-700 hover:border-cyan-500 text-cyan-400 px-4 py-2 rounded-xl font-bold font-mono text-xs flex items-center gap-2 shadow-lg active:scale-95 transition-all duration-150">
+                <span>⚙️</span> CONFIGURACIÓN (CONTROLES, SOMBREROS, AUDIO)
+            </button>
+        </div>
+
+        <div class="text-[10px] text-slate-500 font-mono max-w-md">
+            Controles PC: <kbd class="px-1.5 py-0.5 bg-slate-800 rounded">W,A,S,D</kbd> / <kbd class="px-1.5 py-0.5 bg-slate-800 rounded">▲▼◀▶</kbd>. Habilidades: <kbd class="px-1.5 py-0.5 bg-slate-800 rounded">1, 2, 3</kbd>. Emote: <kbd class="px-1.5 py-0.5 bg-slate-800 rounded">E</kbd>.
+        </div>
+    </div>
+
+    <!-- MODAL DE BIOGRAFÍAS Y SKILLS -->
+    <div id="bio-modal" class="absolute inset-0 bg-slate-950/98 z-40 flex flex-col items-center justify-center p-4 md:p-6 text-center hidden transition-all duration-300 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 md:p-6 w-full max-w-2xl shadow-2xl space-y-4 text-left max-h-[90vh] overflow-y-auto">
+            <h2 class="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 font-mono tracking-wider text-center">
+                MANUAL DE INTELIGENCIA DE LA FÁBRICA
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Bio de Golf Ball -->
+                <div class="bg-slate-950/85 border border-emerald-500/20 p-4 rounded-2xl space-y-2">
+                    <h3 class="text-sm font-bold text-emerald-400 flex items-center gap-1.5">
+                        <span>🔘</span> GOLF BALL (Sobreviviente)
+                    </h3>
+                    <p class="text-[10px] text-slate-400 font-mono leading-relaxed">
+                        Científica de alto intelecto con forma esférica perfecta. Sus destrezas en robótica le permiten crear tecnología de soporte al instante.
+                    </p>
+                    <div class="text-[9px] text-slate-500 font-mono space-y-1">
+                        <p class="text-slate-300 font-bold">HABILIDADES & PASIVA:</p>
+                        <p><b class="text-emerald-400">⚡ Habilidad 1 - SpeedPad:</b> Coloca una plataforma aceleradora en el suelo.</p>
+                        <p><b class="text-emerald-400">🧭 Habilidad 2 - Tracker:</b> Señala la posición exacta del Mecha.</p>
+                        <p><b class="text-emerald-400">👟 Habilidad 3 - Jump Boost:</b> Sobrecarga su próximo salto.</p>
+                        <p><b class="text-cyan-400">🛡️ Pasiva Exclusiva - Salvavidas EMP:</b> Si está en peligro/caída o salva a un aliado campeado a menos de 160px del asesino por 2.5s, libera una detonación que repele al Mecha bot/jugador y la revive.</p>
+                    </div>
+                </div>
+
+                <!-- Bio de Mecha Golf Ball -->
+                <div class="bg-slate-950/85 border border-red-500/20 p-4 rounded-2xl space-y-2">
+                    <h3 class="text-sm font-bold text-red-400 flex items-center gap-1.5">
+                        <span>🤖</span> MECHA GOLF BALL (Asesino)
+                    </h3>
+                    <p class="text-[10px] text-slate-400 font-mono leading-relaxed">
+                        La versión mecanizada y letal de Golf Ball. Diseñado únicamente para asimilar los núcleos orgánicos de cualquier sobreviviente de la flota.
+                    </p>
+                    <div class="text-[9px] text-slate-500 font-mono space-y-1">
+                        <p class="text-slate-300 font-bold">HABILIDADES:</p>
+                        <p><b class="text-red-400">🔥 Habilidad 1 - Fire Blast:</b> Cañón térmico auto-apuntado dentro del radio de terror.</p>
+                        <p><b class="text-red-400">🛸 Habilidad 2 - Drone:</b> Ensambla un dron táctico que dispara rayos térmicos constantes.</p>
+                        <p><b class="text-red-400">👁️ Habilidad 3 - Survivor Eye:</b> Escáner que revela temporalmente la dirección de todo el equipo.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mecánicas de Supervivencia Globales y LMS -->
+            <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-xl space-y-2 text-[10px] font-mono">
+                <h4 class="text-amber-400 font-bold uppercase text-[11px] tracking-wide">Protocolo de Emergencia & LMS (Last Man Standing)</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-400">
+                    <div class="space-y-1">
+                        <p class="text-slate-200 font-bold">Mecánicas Globales:</p>
+                        <p>• <b class="text-white">Rodamiento Táctico:</b> Al caer desde gran altura, todos los supervivientes amortiguan el daño con un veloz rodamiento.</p>
+                        <p>• <b class="text-white">Anti-Campeo Universal:</b> Si Mecha campea a cualquier sobreviviente en el suelo, su temporizador de batería <span class="text-emerald-400">se rellenará</span> progresivamente en lugar de agotarse.</p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-pink-400 font-bold">Último Sobreviviente en Pie (LMS):</p>
+                        <p>• El último sobreviviente activo obtiene escudo masivo de 200 HP.</p>
+                        <p>• <b class="text-pink-300">SpeedPad mejorado:</b> El tiempo de construcción se reduce a la mitad (0.75s), pero será de **1 solo uso**.</p>
+                        <p>• <b class="text-pink-300">Tracker liberado:</b> El escáner ya no te ralentizará al usarlo.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTÓN APLICAR / CERRAR -->
+            <button id="btn-close-bio" class="w-full bg-gradient-to-r from-emerald-600 to-cyan-500 hover:from-emerald-500 hover:to-cyan-400 text-white font-bold py-2.5 rounded-xl shadow-lg active:scale-95 transition-all text-xs uppercase tracking-wider text-center">
+                Entendido, Cerrar Manual
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIGURACIÓN DEL JUEGO -->
+    <div id="settings-modal" class="absolute inset-0 bg-slate-950/98 z-40 flex flex-col items-center justify-center p-6 text-center hidden transition-all duration-300">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 w-full max-w-lg shadow-2xl space-y-6">
+            <h2 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400 font-mono tracking-wider">
+                PANEL DE CONFIGURACIÓN
+            </h2>
+
+            <!-- CONTROL DE VOLUMEN (300%) -->
+            <div class="space-y-2 text-left">
+                <label class="text-xs font-bold text-slate-400 font-mono flex justify-between">
+                    <span>🔊 VOLUMEN DE AUDIO:</span>
+                    <span id="volume-val-display" class="text-cyan-400">100%</span>
+                </label>
+                <input id="slider-volume" type="range" min="0" max="300" value="100" class="w-full accent-cyan-500 bg-slate-800 h-2 rounded-lg cursor-pointer">
+            </div>
+
+            <!-- ORIENTACIÓN DE LOS CONTROLES MÓVILES -->
+            <div class="space-y-3 text-left">
+                <label class="text-xs font-bold text-slate-400 font-mono block">🎮 DISPOSICIÓN DE CONTROLES MÓVILES:</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <button id="ctrl-align-left" class="bg-slate-850 hover:bg-slate-800 border-2 border-cyan-500/80 text-white font-bold py-2 rounded-xl text-xs font-mono transition-all">
+                        Joystick Izq / Botones Der
+                    </button>
+                    <button id="ctrl-align-right" class="bg-slate-800 hover:bg-slate-750 border-2 border-slate-800 text-slate-400 font-bold py-2 rounded-xl text-xs font-mono transition-all">
+                        Botones Izq / Joystick Der
+                    </button>
+                </div>
+            </div>
+
+            <!-- SELECCIONAR SOMBRERO DE MI PERSONAJE -->
+            <div class="space-y-3 text-left">
+                <label class="text-xs font-bold text-slate-400 font-mono block">🎩 SELECCIONA TU SOMBRERO EXCLUSIVO (Sólo Sobrevivientes):</label>
+                <div id="hat-selection-grid" class="grid grid-cols-4 gap-2">
+                    <!-- Inyectado por JS -->
+                </div>
+                <p class="text-[9px] text-slate-500 font-mono italic">Los bots utilizarán de forma aleatoria los sombreros restantes de la fábrica. Mecha Golf Ball nunca usará sombrero.</p>
+            </div>
+
+            <!-- BOTÓN APLICAR / CERRAR -->
+            <button id="btn-close-settings" class="w-full bg-gradient-to-r from-cyan-600 to-blue-500 hover:from-cyan-500 hover:to-blue-400 text-white font-bold py-3 rounded-2xl shadow-lg active:scale-95 transition-all text-xs uppercase tracking-wider border border-cyan-400">
+                Guardar Configuración
+            </button>
+        </div>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL DEL JUEGO -->
+    <div id="game-container" class="relative w-full h-full max-w-6xl max-h-[750px] bg-slate-950 border border-slate-800 md:rounded-2xl overflow-hidden shadow-2xl flex flex-col select-none">
+        
+        <!-- Vista Cinematográfica LMS (Last Man Standing) -->
+        <div id="lms-cinematic-overlay" class="absolute inset-0 bg-red-950/40 border-8 border-red-500/80 z-20 flex flex-col items-center justify-center pointer-events-none transition-all duration-500 opacity-0 scale-95">
+            <div class="text-center">
+                <h2 class="text-5xl md:text-6xl font-black text-red-500 tracking-widest uppercase drop-shadow-[0_0_20px_rgba(239,68,68,0.85)] animate-pulse">SISTEMA SOBRECARGADO</h2>
+                <p class="text-xl md:text-2xl font-mono text-white mt-3 drop-shadow-[0_0_10px_rgba(255,255,255,0.9)] tracking-wide">MÚSICA ACELERADA AL MÁXIMO</p>
+                <div class="w-80 h-1.5 bg-red-500/35 mx-auto mt-5 relative overflow-hidden rounded-full">
+                    <div class="absolute h-full bg-red-500 w-1/2 rounded animate-ping"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HEADER / HUD SUPERIOR -->
+        <header id="game-hud-header" class="absolute top-0 left-0 right-0 z-10 bg-slate-900/85 backdrop-blur-md px-3 py-2 flex justify-between items-center border-b border-slate-800 text-xs md:text-sm hidden">
+            <div class="flex items-center space-x-2">
+                <span id="role-badge" class="tracking-wider uppercase font-bold px-2 py-0.5 rounded text-[10px]">SOBREVIVIENTE</span>
+                <div class="flex items-center space-x-1 font-mono">
+                    <span class="text-slate-400">ACTIVOS:</span>
+                    <span id="allies-counter" class="text-emerald-400 font-bold">8/8</span>
+                </div>
+            </div>
+
+            <!-- TEMPORIZADOR PRINCIPAL -->
+            <div class="flex flex-col items-center">
+                <div id="timer-display" class="font-mono text-lg md:text-2xl font-black text-amber-400 bg-slate-950/80 px-4 py-0.5 rounded-lg border border-slate-800 tracking-wider">
+                    05:15
+                </div>
+                <span id="lms-badge" class="text-[9px] font-black tracking-widest text-pink-500 animate-pulse hidden">¡ÚLTIMO EN PIE! (LMS)</span>
+            </div>
+
+            <!-- ENERGÍA JUGADOR -->
+            <div class="flex items-center space-x-2">
+                <span id="hp-label" class="text-[10px] font-black text-slate-400 uppercase">HP JUGADOR:</span>
+                <div class="w-20 md:w-32 bg-slate-800 h-3 rounded-full overflow-hidden border border-slate-700 relative">
+                    <div id="player-hp-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full w-full transition-all duration-100"></div>
+                    <span id="player-hp-text" class="absolute inset-0 flex items-center justify-center font-mono text-[9px] font-bold">100/100</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- PANEL DE ALERTAS HOLOGRÁFICAS -->
+        <div id="system-alert" class="absolute top-16 left-4 right-4 z-10 bg-slate-900/95 border border-cyan-500/30 p-2 rounded-lg pointer-events-none transition-all duration-300 opacity-0 transform -translate-y-2 flex items-center gap-3">
+            <div class="w-2 h-2 bg-cyan-500 rounded-full animate-ping"></div>
+            <p id="system-alert-text" class="text-[11px] text-cyan-300 font-mono"></p>
+        </div>
+
+        <!-- LISTA LATERAL DE ESTADOS DE SOBREVIVIENTES -->
+        <div class="absolute top-16 right-4 z-10 flex flex-col gap-1 md:gap-1.5 pointer-events-none max-h-[55%] overflow-y-auto animate-fade-in hidden" id="survivors-hud-list">
+            <!-- Se inyecta dinámicamente con JS -->
+        </div>
+
+        <!-- CANVAS DE JUEGO -->
+        <canvas id="gameCanvas" class="w-full h-full block bg-slate-950"></canvas>
+
+        <!-- CONTROLES MÓVILES EXPANSIÓN MÁXIMA - COMPLETAMENTE REDISEÑADOS -->
+        <div id="mobile-controls-container" class="absolute bottom-4 left-4 right-4 z-10 flex flex-row justify-between items-end pointer-events-none hidden">
+            <!-- Zona del Joystick Izquierdo (Móviles) -->
+            <div class="pointer-events-auto relative w-32 h-32 bg-slate-900/70 rounded-full border border-slate-600/50 backdrop-blur-md flex items-center justify-center shadow-2xl" id="joystick-zone">
+                <div id="joystick-handle" class="w-12 h-12 bg-slate-300 rounded-full shadow-inner border border-white/60 absolute cursor-pointer"></div>
+            </div>
+
+            <!-- Panel de Habilidades Radial/Abanico alrededor del Salto en la Esquina Inferior Derecha -->
+            <div class="relative pointer-events-none w-56 h-56 flex items-end justify-end" id="mobile-right-panel">
+                <!-- Botón de Salto Móvil (Anclado en la esquina inferior derecha) -->
+                <button id="btn-mobile-jump" class="absolute right-0 bottom-0 w-24 h-24 bg-blue-600 active:bg-blue-500 text-white font-bold rounded-full border-4 border-blue-400 flex items-center justify-center shadow-2xl active:scale-90 transition-all duration-150 pointer-events-auto z-20">
+                    <span class="text-4xl">▲</span>
+                </button>
+
+                <!-- Contenedor Radial de Habilidades -->
+                <div class="absolute inset-0 pointer-events-none" id="abilities-panel">
+                    <!-- Se inyectan dinámicamente en abanico alrededor del botón de salto -->
+                </div>
+            </div>
+        </div>
+
+        <!-- PANTALLA DE RESULTADOS / FIN DEL JUEGO -->
+        <div id="results-screen" class="absolute inset-0 bg-slate-950/95 z-40 flex flex-col items-center justify-center p-6 text-center transition-all duration-300 scale-0 opacity-0 pointer-events-none">
+            <h2 id="results-title" class="text-4xl font-black text-emerald-500 mb-2 tracking-wide">RESULTADO</h2>
+            <p id="results-message" class="text-xs md:text-sm text-slate-400 max-w-md mb-6 font-mono"></p>
+            <button id="btn-play-again" class="pointer-events-auto bg-gradient-to-r from-cyan-600 to-emerald-500 hover:from-cyan-500 hover:to-emerald-400 text-white font-bold py-2.5 px-8 rounded-full shadow-lg active:scale-95 transition-all duration-150 text-xs uppercase tracking-wider border border-cyan-400">
+                Volver al Lobby
+            </button>
+        </div>
+    </div>
+
+    <!-- AUDIO SINTETIZADO EN TIEMPO REAL CON WEB AUDIO API -->
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // NODO GANANCIA VOLUMEN MAESTRO INTEGRADO
+        const masterGain = audioCtx.createGain();
+        masterGain.connect(audioCtx.destination);
+        let globalVolume = 1.0; // Volumen inicial al 100%
+        masterGain.gain.setValueAtTime(globalVolume, audioCtx.currentTime);
+
+        let synthBgmInterval = null;
+        let lmsSynthInterval = null;
+        let lastBgmBeat = 0;
+
+        function setAudioVolume(volumeFraction) {
+            globalVolume = volumeFraction; // Ahora puede ser de hasta 3.0 (300%)
+            masterGain.gain.setValueAtTime(globalVolume, audioCtx.currentTime);
+        }
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(masterGain); // Conectado a control de volumen maestro
+
+                if (type === 'jump') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(160, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(450, audioCtx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.15);
+                } else if (type === 'boost') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(950, audioCtx.currentTime + 0.35);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.35);
+                } else if (type === 'hurt') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(40, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                } else if (type === 'laser') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(750, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(280, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                } else if (type === 'tracker') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(580, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(780, audioCtx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.2);
+                } else if (type === 'drone') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(130, audioCtx.currentTime + 0.4);
+                    gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else if (type === 'down') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(160, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(50, audioCtx.currentTime + 0.5);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.5);
+                }
+            } catch (e) {}
+        }
+
+        function startBgmSystem() {
+            if (synthBgmInterval) clearInterval(synthBgmInterval);
+            synthBgmInterval = setInterval(() => {
+                if (!gameActive || isLmsMode) return;
+                
+                let dist = 1200;
+                if (currentRole === 'survivor') {
+                    dist = Math.hypot(player.x - killer.x, player.y - killer.y);
+                } else {
+                    dist = 450; 
+                }
+
+                const limitRadius = 700;
+                if (dist < limitRadius) {
+                    const factor = 1 - (dist / limitRadius); 
+                    const bpm = 65 + factor * 115; 
+                    const volume = 0.05 + factor * 0.13;
+                    
+                    const now = audioCtx.currentTime;
+                    if (now - lastBgmBeat > (60 / bpm)) {
+                        triggerHeartbeat(factor, volume);
+                        lastBgmBeat = now;
+                    }
+                } else {
+                    const now = audioCtx.currentTime;
+                    if (now - lastBgmBeat > 1.3) {
+                        triggerHeartbeat(0, 0.025);
+                        lastBgmBeat = now;
+                    }
+                }
+            }, 40);
+        }
+
+        function triggerHeartbeat(intensity, volume) {
+            try {
+                const now = audioCtx.currentTime;
+                
+                const osc1 = audioCtx.createOscillator();
+                const gain1 = audioCtx.createGain();
+                osc1.connect(gain1);
+                gain1.connect(masterGain); 
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(45 + intensity * 20, now);
+                osc1.frequency.exponentialRampToValueAtTime(10, now + 0.12);
+                gain1.gain.setValueAtTime(volume, now);
+                gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                osc1.start();
+                osc1.stop(now + 0.12);
+
+                setTimeout(() => {
+                    if (!gameActive || isLmsMode) return;
+                    try {
+                        const osc2 = audioCtx.createOscillator();
+                        const gain2 = audioCtx.createGain();
+                        osc2.connect(gain2);
+                        gain2.connect(masterGain); 
+                        osc2.type = 'sine';
+                        osc2.frequency.setValueAtTime(40 + intensity * 15, audioCtx.currentTime);
+                        osc2.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.12);
+                        gain2.gain.setValueAtTime(volume * 0.8, audioCtx.currentTime);
+                        gain2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+                        osc2.start();
+                        osc2.stop(audioCtx.currentTime + 0.12);
+                    } catch(e){}
+                }, 180);
+
+            } catch(e){}
+        }
+
+        // MÚSICA LMS INTENSIFICADA (REEMPLAZA COMPLETAMENTE EL RADAR DE TERROR)
+        function startLmsBgm() {
+            if (synthBgmInterval) clearInterval(synthBgmInterval);
+            if (lmsSynthInterval) clearInterval(lmsSynthInterval);
+            
+            let beat = 0;
+            lmsSynthInterval = setInterval(() => {
+                if (!gameActive) return;
+                try {
+                    const osc = audioCtx.createOscillator();
+                    const filter = audioCtx.createBiquadFilter();
+                    const gain = audioCtx.createGain();
+                    
+                    osc.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(masterGain); 
+                    
+                    const notes = [110, 116, 123, 110, 138, 130, 146, 165, 146, 185, 110, 82];
+                    const note = notes[beat % notes.length];
+                    
+                    osc.type = (beat % 4 === 0) ? 'sawtooth' : 'triangle';
+                    osc.frequency.setValueAtTime(note, audioCtx.currentTime);
+                    
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    filter.frequency.exponentialRampToValueAtTime(1500, audioCtx.currentTime + 0.12);
+                    
+                    if (beat % 4 === 0) {
+                        osc.frequency.exponentialRampToValueAtTime(note * 2, audioCtx.currentTime + 0.15);
+                        gain.gain.setValueAtTime(0.09, audioCtx.currentTime);
+                    } else {
+                        gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+                    }
+                    
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.14);
+                    
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.15);
+
+                    if (beat % 2 === 1) {
+                        const noiseNode = audioCtx.createOscillator();
+                        const noiseGain = audioCtx.createGain();
+                        noiseNode.type = 'square';
+                        noiseNode.frequency.setValueAtTime(320, audioCtx.currentTime);
+                        noiseNode.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.08);
+                        noiseNode.connect(noiseGain);
+                        noiseGain.connect(masterGain); 
+                        noiseGain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+                        noiseGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+                        noiseNode.start();
+                        noiseNode.stop(audioCtx.currentTime + 0.08);
+                    }
+
+                    beat++;
+                } catch(e){}
+            }, 150); 
+        }
+    </script>
+
+    <!-- MOTOR DEL JUEGO COMPLETO -->
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let viewportWidth = canvas.width;
+        let viewportHeight = canvas.height;
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width || 800;
+            canvas.height = rect.height || 600;
+            viewportWidth = canvas.width;
+            viewportHeight = canvas.height;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // --- ENTRADA DE CONTROLES ---
+        const keys = {};
+        window.addEventListener('keydown', e => {
+            keys[e.key.toLowerCase()] = true;
+            if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(e.key)) {
+                e.preventDefault();
+            }
+            if (e.key === '1') triggerSkill(0);
+            if (e.key === '2') triggerSkill(1);
+            if (e.key === '3') triggerSkill(2);
+            // TECLA DE EMOTE COSMÉTICO PC: 'E'
+            if (e.key.toLowerCase() === 'e') {
+                triggerPlayerEmote();
+            }
+        });
+        window.addEventListener('keyup', e => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        // Joystick Táctil compatible con Multi-touch verdadero
+        const joystickZone = document.getElementById('joystick-zone');
+        const joystickHandle = document.getElementById('joystick-handle');
+        let joystickActive = false;
+        let joystickTouchId = null;
+        let joystickStart = { x: 0, y: 0 };
+        let joystickMove = { x: 0, y: 0 };
+        const maxJoystickDist = 50; 
+        
+        // Detección de toque rápido en el Joystick para reproducir Emote
+        let joystickTouchStartTime = 0;
+
+        joystickZone.addEventListener('touchstart', e => {
+            if (joystickActive) return;
+            const touch = e.changedTouches[0];
+            joystickTouchId = touch.identifier;
+            joystickActive = true;
+            joystickTouchStartTime = Date.now();
+            
+            const rect = joystickZone.getBoundingClientRect();
+            joystickStart = {
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2
+            };
+        }, { passive: true });
+
+        window.addEventListener('touchmove', e => {
+            if (!joystickActive) return;
+            
+            let activeTouch = null;
+            for (let i = 0; i < e.touches.length; i++) {
+                if (e.touches[i].identifier === joystickTouchId) {
+                    activeTouch = e.touches[i];
+                    break;
+                }
+            }
+            if (!activeTouch) return;
+
+            const dx = activeTouch.clientX - joystickStart.x;
+            const dy = activeTouch.clientY - joystickStart.y;
+            const dist = Math.hypot(dx, dy);
+
+            if (dist <= maxJoystickDist) {
+                joystickMove = { x: dx, y: dy };
+            } else {
+                const angle = Math.atan2(dy, dx);
+                joystickMove = {
+                    x: Math.cos(angle) * maxJoystickDist,
+                    y: Math.sin(angle) * maxJoystickDist
+                };
+            }
+            joystickHandle.style.transform = `translate(${joystickMove.x}px, ${joystickMove.y}px)`;
+
+            // Si se arrastra de forma notable, se cancela el emote cosmético
+            if (dist > 8) {
+                cancelPlayerEmote();
+            }
+        }, { passive: true });
+
+        const endJoystickTouch = (e) => {
+            if (!joystickActive) return;
+            let ended = false;
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                if (e.changedTouches[i].identifier === joystickTouchId) {
+                    ended = true;
+                    break;
+                }
+            }
+            if (ended) {
+                const dragDist = Math.hypot(joystickMove.x, joystickMove.y);
+                const duration = Date.now() - joystickTouchStartTime;
+                
+                // Si fue un click rápido (menos de 220ms) y apenas se desplazó, se considera un tap/click en el joystick
+                if (duration < 220 && dragDist < 8) {
+                    triggerPlayerEmote();
+                }
+
+                joystickActive = false;
+                joystickTouchId = null;
+                joystickMove = { x: 0, y: 0 };
+                joystickHandle.style.transform = `translate(0px, 0px)`;
+            }
+        };
+        window.addEventListener('touchend', endJoystickTouch);
+        window.addEventListener('touchcancel', endJoystickTouch);
+
+        // Botón de Salto para móviles
+        let mobileJumpActive = false;
+        const btnMobileJump = document.getElementById('btn-mobile-jump');
+        btnMobileJump.addEventListener('touchstart', e => {
+            e.preventDefault();
+            mobileJumpActive = true;
+            cancelPlayerEmote();
+        }, { passive: false });
+        btnMobileJump.addEventListener('touchend', e => {
+            e.preventDefault();
+            mobileJumpActive = false;
+        }, { passive: false });
+
+        // SISTEMA DE MECHA GOLF BALL: CLICK MITAD DERECHA DE LA PANTALLA ACTIVA M1 (Melee/Ataque)
+        window.addEventListener('touchstart', e => {
+            if (!gameActive || currentRole !== 'killer') return;
+            const touch = e.changedTouches[0];
+            
+            // Si el toque es en la mitad derecha de la pantalla
+            if (touch.clientX > window.innerWidth / 2) {
+                // Verificar que no se esté pulsando sobre el botón de salto u otra área interactiva de la UI
+                const jumpRect = btnMobileJump.getBoundingClientRect();
+                if (touch.clientX >= jumpRect.left && touch.clientX <= jumpRect.right &&
+                    touch.clientY >= jumpRect.top && touch.clientY <= jumpRect.bottom) {
+                    return; // Es el botón de salto, no hacemos M1
+                }
+                
+                // Verificar que no esté interactuando con las habilidades
+                let hitAbility = false;
+                activeSkills.forEach(skill => {
+                    const sBtn = document.getElementById(`btn-skill-${skill.id}`);
+                    if (sBtn) {
+                        const sRect = sBtn.getBoundingClientRect();
+                        if (touch.clientX >= sRect.left && touch.clientX <= sRect.right &&
+                            touch.clientY >= sRect.top && touch.clientY <= sRect.bottom) {
+                            hitAbility = true;
+                        }
+                    }
+                });
+
+                if (!hitAbility) {
+                    triggerMeleeStrike();
+                    cancelPlayerEmote();
+                }
+            }
+        }, { passive: true });
+
+        // --- SISTEMA DE FÍSICAS DE PLATAFORMA Y CÁMARA ---
+        const GRAVITY = 0.5;
+        const WORLD_WIDTH = 5000;
+        const WORLD_HEIGHT = 1000;
+        const camera = { x: 0, y: 0 };
+        let cameraShake = 0; 
+
+        // Plataformas de la Fábrica
+        const platforms = [
+            { x: 0, y: WORLD_HEIGHT - 60, w: WORLD_WIDTH, h: 60, type: 'floor' },
+            
+            // --- NIVEL 1 (Altura Y = 830) ---
+            { x: 100, y: WORLD_HEIGHT - 170, w: 250, h: 25, type: 'brick', oneWay: true },
+            { x: 450, y: WORLD_HEIGHT - 170, w: 250, h: 25, type: 'brick', oneWay: true },
+            { x: 800, y: WORLD_HEIGHT - 170, w: 250, h: 25, type: 'conveyor', speed: 1.2, dir: 1, oneWay: true },
+            { x: 1150, y: WORLD_HEIGHT - 170, w: 250, h: 25, type: 'fragile', health: 150, maxHealth: 180, oneWay: true },
+            { x: 1500, y: WORLD_HEIGHT - 170, w: 250, h: 25, type: 'moving', xStart: 1450, xEnd: 1750, dir: 1, speed: 1.0, oneWay: true },
+            { x: 1850, y: WORLD_HEIGHT - 170, w: 250, h: 25, type: 'brick', oneWay: true },
+            { x: 2200, y: WORLD_HEIGHT - 170, w: 250, h: 25, type: 'conveyor', speed: 1.2, dir: -1, oneWay: true },
+            { x: 2550, y: WORLD_HEIGHT - 170, w: 250, h: 25, type: 'brick', oneWay: true },
+            { x: 2900, y: WORLD_HEIGHT - 170, w: 250, h: 25, type: 'fragile', health: 150, maxHealth: 180, oneWay: true },
+            { x: 3250, y: WORLD_HEIGHT - 170, w: 400, h: 25, type: 'brick', oneWay: true },
+            { x: 3750, y: WORLD_HEIGHT - 170, w: 250, h: 25, type: 'brick', oneWay: true },
+            { x: 4100, y: WORLD_HEIGHT - 170, w: 250, h: 25, type: 'conveyor', speed: 1.3, dir: 1, oneWay: true },
+            { x: 4450, y: WORLD_HEIGHT - 170, w: 450, h: 25, type: 'brick', oneWay: true },
+
+            // --- INTERMEDIO 1.5 (Altura Y = 700) ---
+            { x: 250, y: WORLD_HEIGHT - 300, w: 250, h: 25, type: 'brick', oneWay: true },
+            { x: 600, y: WORLD_HEIGHT - 300, w: 250, h: 25, type: 'conveyor', speed: 1.5, dir: 1, oneWay: true },
+            { x: 950, y: WORLD_HEIGHT - 300, w: 250, h: 25, type: 'brick', oneWay: true },
+            { x: 1300, y: WORLD_HEIGHT - 300, w: 250, h: 25, type: 'moving', xStart: 1250, xEnd: 1550, dir: -1, speed: 1.2, oneWay: true },
+            { x: 1650, y: WORLD_HEIGHT - 300, w: 250, h: 25, type: 'brick', oneWay: true },
+            { x: 2000, y: WORLD_HEIGHT - 300, w: 250, h: 25, type: 'conveyor', speed: 1.5, dir: -1, oneWay: true },
+            { x: 2350, y: WORLD_HEIGHT - 300, w: 250, h: 25, type: 'brick', oneWay: true },
+            { x: 2700, y: WORLD_HEIGHT - 300, w: 250, h: 25, type: 'brick', oneWay: true },
+            { x: 3050, y: WORLD_HEIGHT - 300, w: 400, h: 25, type: 'conveyor', speed: 1.2, dir: 1, oneWay: true },
+            { x: 3600, y: WORLD_HEIGHT - 300, w: 300, h: 25, type: 'brick', oneWay: true },
+            { x: 4000, y: WORLD_HEIGHT - 300, w: 300, h: 25, type: 'moving', xStart: 3950, xEnd: 4250, dir: 1, speed: 1.4, oneWay: true },
+            { x: 4400, y: WORLD_HEIGHT - 300, w: 450, h: 25, type: 'conveyor', speed: 1.5, dir: -1, oneWay: true },
+
+            // --- NIVEL 2 (Altura Y = 550) ---
+            { x: 100, y: WORLD_HEIGHT - 450, w: 350, h: 25, type: 'brick', oneWay: true },
+            { x: 550, y: WORLD_HEIGHT - 450, w: 350, h: 25, type: 'conveyor', speed: 1.5, dir: -1, oneWay: true },
+            { x: 1000, y: WORLD_HEIGHT - 450, w: 350, h: 25, type: 'brick', oneWay: true },
+            { x: 1450, y: WORLD_HEIGHT - 450, w: 350, h: 25, type: 'moving', xStart: 1400, xEnd: 1700, dir: 1, speed: 1.5, oneWay: true },
+            { x: 1900, y: WORLD_HEIGHT - 450, w: 350, h: 25, type: 'brick', oneWay: true },
+            { x: 2350, y: WORLD_HEIGHT - 450, w: 350, h: 25, type: 'conveyor', speed: 1.5, dir: 1, oneWay: true },
+            { x: 2800, y: WORLD_HEIGHT - 450, w: 350, h: 25, type: 'brick', oneWay: true },
+            { x: 3250, y: WORLD_HEIGHT - 450, w: 450, h: 25, type: 'brick', oneWay: true },
+            { x: 3800, y: WORLD_HEIGHT - 450, w: 350, h: 25, type: 'conveyor', speed: 1.6, dir: 1, oneWay: true },
+            { x: 4250, y: WORLD_HEIGHT - 450, w: 600, h: 25, type: 'brick', oneWay: true },
+
+            // --- NIVEL 3 SUPERIOR (Altura Y = 350) ---
+            { x: 250, y: WORLD_HEIGHT - 650, w: 400, h: 25, type: 'brick', oneWay: true },
+            { x: 800, y: WORLD_HEIGHT - 650, w: 400, h: 25, type: 'conveyor', speed: 1.5, dir: 1, oneWay: true },
+            { x: 1350, y: WORLD_HEIGHT - 650, w: 400, h: 25, type: 'brick', oneWay: true },
+            { x: 2000, y: WORLD_HEIGHT - 800, w: 400, h: 25, type: 'conveyor', speed: 1.5, dir: -1, oneWay: true },
+            { x: 2450, y: WORLD_HEIGHT - 650, w: 400, h: 25, type: 'brick', oneWay: true },
+            { x: 3000, y: WORLD_HEIGHT - 650, w: 500, h: 25, type: 'brick', oneWay: true },
+            { x: 3600, y: WORLD_HEIGHT - 650, w: 450, h: 25, type: 'conveyor', speed: 1.5, dir: -1, oneWay: true },
+            { x: 4150, y: WORLD_HEIGHT - 800, w: 350, h: 25, type: 'brick', oneWay: true },
+            { x: 4550, y: WORLD_HEIGHT - 650, w: 350, h: 25, type: 'brick', oneWay: true },
+
+            // Rampas
+            { x: 380, y: WORLD_HEIGHT - 120, w: 100, h: 60, type: 'ramp', slope: -1 },
+            { x: 1000, y: WORLD_HEIGHT - 120, w: 100, h: 60, type: 'ramp', slope: 1 },
+            { x: 1800, y: WORLD_HEIGHT - 120, w: 100, h: 60, type: 'ramp', slope: -1 },
+            { x: 2500, y: WORLD_HEIGHT - 120, w: 100, h: 60, type: 'ramp', slope: 1 },
+            { x: 3500, y: WORLD_HEIGHT - 120, w: 100, h: 60, type: 'ramp', slope: -1 },
+            { x: 4300, y: WORLD_HEIGHT - 120, w: 100, h: 60, type: 'ramp', slope: 1 },
+
+            // Resortes
+            { x: 480, y: WORLD_HEIGHT - 85, w: 32, h: 25, type: 'spring', force: 18 },
+            { x: 1100, y: WORLD_HEIGHT - 85, w: 32, h: 25, type: 'spring', force: 18 },
+            { x: 1900, y: WORLD_HEIGHT - 85, w: 32, h: 25, type: 'spring', force: 18 },
+            { x: 2600, y: WORLD_HEIGHT - 85, w: 32, h: 25, type: 'spring', force: 18 },
+            { x: 3200, y: WORLD_HEIGHT - 85, w: 32, h: 25, type: 'spring', force: 18 },
+            { x: 3650, y: WORLD_HEIGHT - 85, w: 32, h: 25, type: 'spring', force: 18 },
+            { x: 4100, y: WORLD_HEIGHT - 85, w: 32, h: 25, type: 'spring', force: 19 },
+            { x: 4600, y: WORLD_HEIGHT - 85, w: 32, h: 25, type: 'spring', force: 18 },
+            { x: 900, y: WORLD_HEIGHT - 475, w: 32, h: 25, type: 'spring', force: 15 },
+            { x: 2200, y: WORLD_HEIGHT - 475, w: 32, h: 25, type: 'spring', force: 15 },
+            { x: 3400, y: WORLD_HEIGHT - 475, w: 32, h: 25, type: 'spring', force: 15 },
+            { x: 4400, y: WORLD_HEIGHT - 475, w: 32, h: 25, type: 'spring', force: 15 }
+        ];
+
+        // Todos los sombreros disponibles
+        const HAT_TYPES = [
+            'crown', 'cowboy', 'tophat', 'cap', 'beret', 'chef', 'horns', 'party'
+        ];
+        
+        // Configuración elegida por el usuario
+        let chosenPlayerHat = 'crown'; 
+        let controlsInverted = false;  
+
+        // Traducción de nombres para interfaz de selección
+        const HAT_NAMES = {
+            crown: '👑 Realeza',
+            cowboy: '🤠 Cowboy',
+            tophat: '🎩 Elegante',
+            cap: '🧢 Deportiva',
+            beret: '🧣 Boina',
+            chef: '🍳 Chef',
+            horns: '😈 Cuernos',
+            party: '🎉 Fiesta'
+        };
+
+        // Estados globales de juego
+        let gameActive = false;
+        let currentRole = 'survivor';
+        let timeRemaining = 315;
+        let totalSurvivorsCount = 8;
+        let isLmsMode = false;
+        let postTimerSeconds = 0;
+        let ringEscapesSpawned = false;
+        let escapeRings = [];
+
+        let internalFrameCounter = 0;
+        let lmsCinematicTimer = 0; 
+
+        let player = {};
+        let killer = {};
+        let survivors = [];
+        let speedPads = [];
+        let activeDrones = [];
+        let projectiles = [];
+        let particles = [];
+
+        function triggerSystemAlert(message) {
+            const container = document.getElementById('system-alert');
+            const text = document.getElementById('system-alert-text');
+            text.innerText = `[SISTEMA G.B. ACTIVO] > ${message}`;
+            container.classList.remove('opacity-0', '-translate-y-2');
+            container.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                container.classList.add('opacity-0', '-translate-y-2');
+                container.classList.remove('opacity-100', 'translate-y-0');
+            }, 3000);
+        }
+
+        const isKiller = (entity) => {
+            if (!entity) return false;
+            if (currentRole === 'survivor' && entity === killer) return true;
+            if (currentRole === 'killer' && entity === player) return true;
+            return false;
+        };
+
+        const getKillerCoords = () => {
+            if (currentRole === 'survivor') {
+                return { x: killer.x, y: killer.y };
+            } else {
+                return { x: player.x, y: player.y };
+            }
+        };
+
+        function triggerLmsCinematic() {
+            lmsCinematicTimer = 150; 
+            cameraShake = 25; 
+            playSound('down');
+
+            const overlay = document.getElementById('lms-cinematic-overlay');
+            overlay.classList.remove('opacity-0', 'scale-95');
+            overlay.classList.add('opacity-100', 'scale-100');
+
+            setTimeout(() => {
+                overlay.classList.add('opacity-0', 'scale-95');
+                overlay.classList.remove('opacity-100', 'scale-100');
+            }, 2500);
+        }
+
+        // Habilidades
+        const survivorSkills = [
+            { id: 'speedpad', name: 'SpeedPad', cd: 0, maxCd: 12, key: '1', icon: '⚡' },
+            { id: 'tracker', name: 'Tracker', cd: 0, maxCd: 15, key: '2', icon: '🧭' },
+            { id: 'jumpboost', name: 'Jump Boost', cd: 0, maxCd: 18, key: '3', icon: '👟' }
+        ];
+
+        const killerSkills = [
+            { id: 'fireblast', name: 'Fire Blast', cd: 0, maxCd: 10, key: '1', icon: '🔥' },
+            { id: 'drone', name: 'Sentinel Drone', cd: 0, maxCd: 16, key: '2', icon: '🛸' },
+            { id: 'tracker_all', name: 'Survivor Eye', cd: 0, maxCd: 20, key: '3', icon: '👁️' }
+        ];
+
+        let activeSkills = [];
+
+        function initGame(role) {
+            currentRole = role;
+            gameActive = true;
+            timeRemaining = 315;
+            isLmsMode = false;
+            postTimerSeconds = 0;
+            internalFrameCounter = 0;
+            lmsCinematicTimer = 0;
+            cameraShake = 0;
+            ringEscapesSpawned = false;
+            escapeRings = [];
+            projectiles = [];
+            speedPads = [];
+            activeDrones = [];
+            particles = [];
+
+            // Mostrar el HUD del juego
+            document.getElementById('game-hud-header').classList.remove('hidden');
+            document.getElementById('survivors-hud-list').classList.remove('hidden');
+            document.getElementById('mobile-controls-container').classList.remove('hidden');
+
+            platforms.forEach(p => {
+                if (p.type === 'fragile') {
+                    p.health = p.maxHealth;
+                }
+            });
+
+            const resultsScreen = document.getElementById('results-screen');
+            resultsScreen.classList.remove('scale-100', 'opacity-100');
+            resultsScreen.classList.add('scale-0', 'opacity-0', 'pointer-events-none');
+            document.getElementById('lms-badge').classList.add('hidden');
+
+            // Filtrar lista de sombreros para los bots
+            const remainingHats = HAT_TYPES.filter(hat => hat !== chosenPlayerHat);
+
+            if (role === 'survivor') {
+                document.getElementById('role-badge').innerText = "SOBREVIVIENTE";
+                document.getElementById('role-badge').className = "bg-emerald-950 text-emerald-400 tracking-wider uppercase font-bold px-2 py-0.5 rounded text-[10px]";
+                activeSkills = JSON.parse(JSON.stringify(survivorSkills));
+
+                // GOLF BALL ES EL PERSONAJE EXCLUSIVO DEL JUGADOR
+                player = {
+                    x: 150, y: WORLD_HEIGHT - 120, vx: 0, vy: 0,
+                    r: 20, speed: 4, jumpPower: 12.5,
+                    health: 100, maxHealth: 100, lives: 2,
+                    isBot: false, id: 0, name: "Golf Ball (Tú)",
+                    state: 'NORMAL',
+                    downTimer: 0,
+                    speedBoostTimer: 0,
+                    jumpBoostActive: false,
+                    jumpBoostCharge: 0,
+                    fallHeightStart: WORLD_HEIGHT - 120,
+                    isRolling: false,
+                    rollTimer: 0,
+                    burnTimer: 0,
+                    burnStrength: 0,
+                    lmsBuff: false,
+                    hatStyle: chosenPlayerHat, 
+                    buildingSpeedpadTimer: 0, 
+                    trackerSlowTimer: 0,
+                    onGround: false,
+                    campTimer: 0,
+                    lastX: 150,
+                    stuckFrames: 0,
+                    emoteTimer: 0,
+                    activeEmote: null
+                };
+
+                // El asesino Mecha es el bot enemigo
+                killer = {
+                    x: WORLD_WIDTH - 250, y: WORLD_HEIGHT - 150, vx: 0, vy: 0,
+                    r: 26, speed: 5.0, jumpPower: 13.5,
+                    faceDir: -1, state: 'CHASING', target: null,
+                    attackCd: 0, skillCd1: 0, skillCd2: 0, skillCd3: 0,
+                    burnTimer: 0, burnStrength: 0, speedBoostTimer: 0,
+                    name: "Mecha Golf Ball (Bot)",
+                    lives: 1, state: 'NORMAL', health: 100,
+                    hatStyle: null,
+                    lastX: WORLD_WIDTH - 250,
+                    stuckFrames: 0,
+                    decisionTimer: 0,
+                    emoteTimer: 0,
+                    activeEmote: null
+                };
+
+                survivors = [];
+                const aiArchetypes = ['helper', 'juker', 'tactical', 'coward', 'helper', 'juker', 'tactical'];
+                const namesList = ['Balloony', 'Bubble', 'Coiny', 'Gelatin', 'Leafy', 'Teardrop', 'Tennis Ball'];
+                
+                for (let i = 0; i < 7; i++) {
+                    survivors.push({
+                        id: i + 1,
+                        name: namesList[i],
+                        x: 350 + i * 380,
+                        y: WORLD_HEIGHT - 120,
+                        vx: 0, vy: 0,
+                        r: 18,
+                        speed: 3.7 + Math.random() * 0.4,
+                        jumpPower: 11.5 + Math.random() * 1.5,
+                        health: 100, maxHealth: 100, lives: 2,
+                        state: 'NORMAL',
+                        downTimer: 0,
+                        isBot: true,
+                        archetype: aiArchetypes[i],
+                        speedBoostTimer: 0,
+                        burnTimer: 0,
+                        burnStrength: 0,
+                        speedpadCd: 0,
+                        jumpboostCd: 0,
+                        patrolTargetX: 300 + i * 380 + (Math.random() - 0.5) * 500,
+                        hatStyle: remainingHats[i % remainingHats.length], 
+                        buildingSpeedpadTimer: 0,
+                        fallHeightStart: WORLD_HEIGHT - 120,
+                        rollTimer: 0,
+                        campTimer: 0,
+                        lastX: 350 + i * 380,
+                        stuckFrames: 0,
+                        decisionTimer: 0,
+                        emoteTimer: 0,
+                        activeEmote: null
+                    });
+                }
+            } else {
+                document.getElementById('role-badge').innerText = "ASESINO (MECHA)";
+                document.getElementById('role-badge').className = "bg-red-950 text-red-400 tracking-wider uppercase font-bold px-2 py-0.5 rounded text-[10px]";
+                activeSkills = JSON.parse(JSON.stringify(killerSkills));
+
+                // JUGADOR JUEGA COMO MECHA GOLF BALL
+                player = {
+                    x: WORLD_WIDTH - 250, y: WORLD_HEIGHT - 150, vx: 0, vy: 0,
+                    r: 26, speed: 5.0, jumpPower: 13.8,
+                    health: 100, isBot: false, name: "Mecha Golf Ball (Tú)",
+                    meleeCd: 0, skillCd1: 0, skillCd2: 0, skillCd3: 0, faceDir: -1,
+                    lives: 1, state: 'NORMAL', burnTimer: 0, burnStrength: 0, speedBoostTimer: 0,
+                    hatStyle: null, 
+                    buildingSpeedpadTimer: 0,
+                    trackerSlowTimer: 0,
+                    jumpBoostActive: false,
+                    jumpBoostCharge: 0,
+                    rollTimer: 0,
+                    onGround: false,
+                    campTimer: 0,
+                    lastX: WORLD_WIDTH - 250,
+                    stuckFrames: 0,
+                    emoteTimer: 0,
+                    activeEmote: null
+                };
+
+                // El equipo sobreviviente bot tiene a Golf Ball entre sus filas (bot controlado)
+                survivors = [];
+                const namesList = ['Golf Ball', 'Balloony', 'Bubble', 'Coiny', 'Gelatin', 'Leafy', 'Teardrop', 'Tennis Ball'];
+                const aiArchetypes = ['tactical', 'helper', 'juker', 'coward', 'helper', 'juker', 'tactical', 'coward'];
+                
+                for (let i = 0; i < 8; i++) {
+                    survivors.push({
+                        id: i,
+                        name: namesList[i],
+                        x: 200 + i * 360,
+                        y: WORLD_HEIGHT - 120,
+                        vx: 0, vy: 0,
+                        r: 18,
+                        speed: 3.7 + Math.random() * 0.4,
+                        jumpPower: 11.5 + Math.random() * 1.5,
+                        health: 100, maxHealth: 100, lives: 2,
+                        state: 'NORMAL',
+                        downTimer: 0,
+                        isBot: true,
+                        archetype: aiArchetypes[i],
+                        speedBoostTimer: 0,
+                        burnTimer: 0,
+                        burnStrength: 0,
+                        speedpadCd: 0,
+                        jumpboostCd: 0,
+                        patrolTargetX: 200 + i * 360 + (Math.random() - 0.5) * 500,
+                        hatStyle: namesList[i] === 'Golf Ball' ? chosenPlayerHat : remainingHats[i % remainingHats.length], 
+                        buildingSpeedpadTimer: 0,
+                        fallHeightStart: WORLD_HEIGHT - 120,
+                        rollTimer: 0,
+                        campTimer: 0,
+                        lastX: 200 + i * 360,
+                        stuckFrames: 0,
+                        decisionTimer: 0,
+                        emoteTimer: 0,
+                        activeEmote: null
+                    });
+                }
+            }
+
+            document.getElementById('lobby-screen').classList.add('hidden');
+            
+            buildAbilityButtons();
+            startBgmSystem();
+
+            resizeCanvas();
+            camera.x = player.x - canvas.width / 2;
+            camera.y = player.y - canvas.height / 2;
+            camera.x = Math.max(0, Math.min(WORLD_WIDTH - canvas.width, camera.x));
+            camera.y = Math.max(0, Math.min(WORLD_HEIGHT - canvas.height, camera.y));
+
+            triggerSystemAlert("¡PARTIDA INICIADA EN LA FÁBRICA EXPANDIDA!");
+        }
+
+        // Construcción radial de botones de habilidad móviles
+        function buildAbilityButtons() {
+            const panel = document.getElementById('abilities-panel');
+            panel.innerHTML = '';
+            
+            const radius = 95; 
+            const numSkills = activeSkills.length;
+            
+            activeSkills.forEach((skill, idx) => {
+                const angle = -Math.PI / 2 - ((idx + 0.5) * (Math.PI / 2) / numSkills);
+                const xPos = Math.cos(angle) * radius;
+                const yPos = Math.sin(angle) * radius;
+
+                const wrapper = document.createElement('div');
+                wrapper.className = "absolute flex flex-col items-center pointer-events-auto z-10";
+                
+                wrapper.style.right = `${12 + -xPos}px`;
+                wrapper.style.bottom = `${12 + -yPos}px`;
+                
+                wrapper.innerHTML = `
+                    <button id="btn-skill-${skill.id}" class="w-16 h-16 rounded-full bg-slate-900 border-2 border-slate-700 flex items-center justify-center relative text-2xl shadow-2xl transition-all duration-150 active:scale-90">
+                        <span id="icon-${skill.id}">${skill.icon}</span>
+                        <span id="cd-text-${skill.id}" class="absolute inset-0 flex items-center justify-center bg-slate-950/90 rounded-full font-mono text-xs text-white opacity-0"></span>
+                    </button>
+                    <span class="text-[8px] font-bold text-slate-300 bg-slate-950/85 px-1 rounded font-mono text-center max-w-[65px] truncate mt-0.5">${skill.name}</span>
+                `;
+                
+                const btn = wrapper.querySelector('button');
+                
+                btn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    triggerSkill(idx);
+                }, { passive: false });
+                
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    triggerSkill(idx);
+                });
+
+                panel.appendChild(wrapper);
+            });
+        }
+
+        let activeTrackerArrow = 0;
+        let activeGlobalEye = 0;
+
+        function triggerSkill(index) {
+            if (!gameActive) return;
+            const skill = activeSkills[index];
+            if (!skill || skill.cd > 0) return;
+
+            if (currentRole === 'survivor' && player.state !== 'NORMAL') return;
+
+            if (currentRole === 'survivor') {
+                if (skill.id === 'speedpad') {
+                    if (!player.onGround) {
+                        triggerSystemAlert("¡ERROR! Necesitas estar apoyado en el suelo para anclar el Speedpad.");
+                        return;
+                    }
+                    triggerSystemAlert("CANALIZANDO DISPOSITIVO SPEEDPAD (1.5S)...");
+                    player.buildingSpeedpadTimer = 90; 
+                    skill.cd = skill.maxCd;
+                } 
+                else if (skill.id === 'tracker') {
+                    triggerSystemAlert("RASTREANDO COORDENADAS... SISTEMA RALENTIZADO 2S");
+                    playSound('tracker');
+                    activeTrackerArrow = 180;
+                    player.trackerSlowTimer = 120; 
+                    skill.cd = skill.maxCd;
+                }
+                else if (skill.id === 'jumpboost') {
+                    triggerSystemAlert("PREPARANDO PROPULSOR HIDRÁULICO...");
+                    player.jumpBoostCharge = 30;
+                    skill.cd = skill.maxCd;
+                }
+            } 
+            else {
+                if (skill.id === 'fireblast') {
+                    triggerSystemAlert("CALIBRANDO CAÑÓN TÉRMICO (AIMBOT)...");
+                    player.fireBlastCharge = 120; 
+                    skill.cd = skill.maxCd;
+                }
+                else if (skill.id === 'drone') {
+                    if (activeDrones.length >= 4) {
+                        activeDrones.shift();
+                    }
+                    triggerSystemAlert("DESPLEGANDO DRON: ENSAMBLAJE EN CURSO...");
+                    playSound('drone');
+                    activeDrones.push({
+                        x: player.x,
+                        y: player.y - 25,
+                        r: 15,
+                        radarRadius: 130,
+                        shootCd: 0,
+                        pulseWave: 0,
+                        buildProgress: 0, 
+                        buildMax: 120    
+                    });
+                    skill.cd = skill.maxCd;
+                }
+                else if (skill.id === 'tracker_all') {
+                    triggerSystemAlert("ESCANEANDO FIRMAS DE CALOR (5S)");
+                    playSound('tracker');
+                    activeGlobalEye = 300;
+                    skill.cd = skill.maxCd;
+                }
+            }
+        }
+
+        // SISTEMA DE EMOTES COSMÉTICOS
+        function triggerPlayerEmote() {
+            if (!gameActive) return;
+            player.emoteTimer = 150; // Duración de 2.5 segundos
+            player.activeEmote = currentRole === 'survivor' ? 'calculation' : 'mecha_laugh';
+            playSound('tracker');
+        }
+
+        function cancelPlayerEmote() {
+            if (player && player.emoteTimer > 0) {
+                player.emoteTimer = 0;
+                player.activeEmote = null;
+            }
+        }
+
+        function triggerMeleeStrike() {
+            if (currentRole !== 'killer') return;
+            if (player.meleeCd > 0) return;
+
+            player.meleeCd = 1.0; 
+            playSound('laser');
+
+            const dir = player.faceDir;
+            particles.push({
+                x: player.x + dir * 35,
+                y: player.y,
+                vx: dir * 5,
+                vy: -0.5,
+                r: 16, 
+                color: 'rgba(239,68,68,0.85)',
+                life: 12,
+                style: 'melee_slash'
+            });
+
+            survivors.forEach(s => {
+                if (s.state === 'NORMAL') {
+                    const dist = Math.hypot(s.x - (player.x + dir * 35), s.y - player.y);
+                    if (dist < s.r + 35) { 
+                        applyDamage(s, 10); // Reducido el daño melee a 10 para balancear
+                    }
+                }
+            });
+        }
+
+        function applyDamage(target, damage) {
+            if (!target || target.state !== 'NORMAL' || isKiller(target)) return;
+            
+            let finalDamage = damage;
+            if (target.lmsBuff) {
+                finalDamage = damage * 0.5;
+            }
+
+            target.health -= finalDamage;
+            playSound('hurt');
+            cameraShake = Math.max(cameraShake, 15); 
+
+            for (let i = 0; i < 12; i++) {
+                particles.push({
+                    x: target.x,
+                    y: target.y,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8 - 2,
+                    r: Math.random() * 4 + 1,
+                    color: '#ef4444',
+                    life: 25
+                });
+            }
+
+            // BOOST AL SUFRIR DAÑO: Incrementado a 2.3x de velocidad, se activa INCONDICIONALMENTE sin mínimo
+            target.speedBoostTimer = 240; 
+            cancelPlayerEmote();
+
+            if (target.health <= 0) {
+                if (target.lives > 1) {
+                    target.state = 'DOWN';
+                    target.health = 0;
+                    target.lives = 1;
+                    target.downTimer = 900;
+                    target.campTimer = 0; // Resetear timer de campeo al caer
+                    playSound('down');
+                    triggerSystemAlert(`¡${target.name} ESTÁ DOWN! El sistema recargará su batería si es campeado.`);
+                } else {
+                    target.state = 'DEAD';
+                    triggerSystemAlert(`Sujeto ${target.name} ha sido completamente asimilado.`);
+                    timeRemaining += 30;
+                }
+            }
+        }
+
+        function applyBurnEffect(entity, rate, duration) {
+            if (!entity) return;
+            entity.burnTimer = duration;
+            entity.burnStrength = rate * 0.7; // Daño por quemadura más amigable (0.7 por tick)
+        }
+
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                if (!p) continue;
+                p.life--;
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                } else {
+                    p.x += p.vx || 0;
+                    p.y += p.vy || 0;
+                }
+            }
+        }
+
+        function updateGame() {
+            if (!gameActive) return;
+
+            if (cameraShake > 0) {
+                cameraShake *= 0.9;
+                if (cameraShake < 0.2) cameraShake = 0;
+            }
+
+            if (lmsCinematicTimer > 0) {
+                lmsCinematicTimer--;
+            }
+
+            const currentSpeedDilation = (lmsCinematicTimer > 0) ? 0.25 : 1.0;
+
+            internalFrameCounter++;
+            if (internalFrameCounter >= 60) {
+                internalFrameCounter = 0;
+                if (timeRemaining > 0) {
+                    timeRemaining--;
+                } else {
+                    postTimerSeconds++;
+                }
+            }
+
+            if (timeRemaining > 0) {
+                const mins = Math.floor(timeRemaining / 60);
+                const secs = timeRemaining % 60;
+                document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                document.getElementById('timer-display').classList.remove('text-red-500');
+            } else {
+                if (!ringEscapesSpawned) {
+                    ringEscapesSpawned = true;
+                    triggerSystemAlert("¡HOLOGRADO DE EVACUACIÓN DESPLEGADO! Ve a las zonas verdes.");
+                    escapeRings = [
+                        { x: 300, y: WORLD_HEIGHT - 350, r: 40, active: true },
+                        { x: 2100, y: WORLD_HEIGHT - 650, r: 40, active: true },
+                        { x: 4700, y: WORLD_HEIGHT - 120, r: 40, active: true }
+                    ];
+                }
+                const negativeSecs = postTimerSeconds;
+                document.getElementById('timer-display').innerText = `-${negativeSecs}s`;
+                document.getElementById('timer-display').classList.add('text-red-500');
+
+                if (negativeSecs >= 100) {
+                    endGame(false, "El colapso energético de la fábrica sepultó a los sobrevivientes.");
+                }
+            }
+
+            activeSkills.forEach(s => {
+                if (s.cd > 0) {
+                    const reduction = player.lmsBuff ? 1.4 : 1;
+                    s.cd -= (1 / 60) * reduction;
+                }
+            });
+
+            if (currentRole === 'killer') {
+                if (player.meleeCd > 0) player.meleeCd -= (1 / 60);
+            }
+
+            const allSuvs = currentRole === 'survivor' ? survivors.concat([player]) : survivors;
+            const countAlive = allSuvs.filter(s => s && s.state !== 'DEAD').length;
+            document.getElementById('allies-counter').innerText = `${countAlive}/${totalSurvivorsCount}`;
+
+            if (countAlive === 1 && !isLmsMode) {
+                isLmsMode = true;
+                document.getElementById('lms-badge').classList.remove('hidden');
+                
+                triggerLmsCinematic();
+
+                if (currentRole === 'survivor' && player.state === 'NORMAL') {
+                    player.lmsBuff = true;
+                    player.health = 200;
+                    document.getElementById('player-hp-bar').className = "bg-gradient-to-r from-purple-500 to-pink-500 h-full transition-all duration-100";
+                    triggerSystemAlert("¡ÚLTIMO SOBREVIENTE! Escudos de emergencia maximizados.");
+                } else {
+                    const lastBot = survivors.find(s => s && s.state === 'NORMAL');
+                    if (lastBot) {
+                        lastBot.lmsBuff = true;
+                        lastBot.health = 200;
+                        triggerSystemAlert(`¡${lastBot.name} es el último en pie! Sobrecarga de energía.`);
+                    }
+                }
+
+                // LMS dura 150 segundos
+                timeRemaining = 150; 
+                startLmsBgm();
+            }
+
+            if (player.trackerSlowTimer > 0) {
+                // LMS: Tracker ya no ralentiza
+                if (isLmsMode) {
+                    player.trackerSlowTimer = 0;
+                } else {
+                    player.trackerSlowTimer--;
+                }
+            }
+
+            if (player.buildingSpeedpadTimer > 0) {
+                // LMS: Speedpad toma la mitad de tiempo en ponerse (Se decrementa el doble por frame)
+                if (isLmsMode) {
+                    player.buildingSpeedpadTimer -= 2;
+                    if (player.buildingSpeedpadTimer < 0) player.buildingSpeedpadTimer = 0;
+                } else {
+                    player.buildingSpeedpadTimer--;
+                }
+
+                if (player.buildingSpeedpadTimer === 0) {
+                    playSound('drone');
+                    speedPads.push({
+                        x: player.x,
+                        y: player.y + player.r - 5,
+                        w: 60,
+                        h: 10,
+                        life: 600,
+                        maxLife: 600,
+                        isLmsPad: isLmsMode // Identificador de un solo uso en LMS
+                    });
+                    triggerSystemAlert(isLmsMode ? "¡SPEEDPAD EXPRESS (1 USO) CONSTRUIDO!" : "¡SPEEDPAD CONSTRUIDO CON ÉXITO!");
+                }
+            }
+
+            if (player.state !== 'DOWN') {
+                player.vy += GRAVITY * currentSpeedDilation;
+            }
+
+            if (player.jumpBoostCharge > 0) {
+                player.jumpBoostCharge--;
+                if (player.jumpBoostCharge === 0) {
+                    player.jumpBoostActive = true;
+                    triggerSystemAlert("TURBINA DE CALZADO LISTA. Próximo salto duplicado.");
+                }
+            }
+
+            // --- CAÑÓN TÉRMICO CON AUTO-AIM (AIMBOT) EN RADIO DE TERROR ---
+            if (player.fireBlastCharge > 0) {
+                player.fireBlastCharge--;
+                if (player.fireBlastCharge === 0) {
+                    let shootAngle = player.faceDir === 1 ? 0 : Math.PI;
+                    
+                    const activeSuvs = survivors.filter(s => s && s.state === 'NORMAL');
+                    let targetSuv = null;
+                    let closestDist = 700;
+
+                    activeSuvs.forEach(s => {
+                        const d = Math.hypot(s.x - player.x, s.y - player.y);
+                        if (d < closestDist) {
+                            closestDist = d;
+                            targetSuv = s;
+                        }
+                    });
+
+                    if (targetSuv) {
+                        shootAngle = Math.atan2(targetSuv.y - player.y, targetSuv.x - player.x);
+                        triggerSystemAlert(`[AIMBOT] Objetivo fijado en ${targetSuv.name}. ¡Disparo térmico!`);
+                    } else {
+                        triggerSystemAlert("Disparo manual liberado (Sin objetivos en el radio de terror).");
+                    }
+
+                    playSound('laser');
+                    projectiles.push({
+                        x: player.x,
+                        y: player.y,
+                        vx: Math.cos(shootAngle) * 11.5, 
+                        vy: Math.sin(shootAngle) * 11.5,
+                        r: 10, 
+                        color: '#f97316',
+                        type: 'fire',
+                        danger: true
+                    });
+                }
+            }
+
+            let moveX = 0;
+            if (keys['a'] || keys['arrowleft']) moveX = -1;
+            if (keys['d'] || keys['arrowright']) moveX = 1;
+
+            if (joystickActive) {
+                moveX = joystickMove.x / maxJoystickDist;
+            }
+
+            if (player.buildingSpeedpadTimer > 0) {
+                moveX = 0;
+            }
+
+            // Cancelación de emotes al moverse
+            if (moveX !== 0 || player.vy !== 0) {
+                player.emoteTimer = 0;
+                player.activeEmote = null;
+            }
+
+            // --- REGLAS ANTICAMPEO SUTILMENTE REESTRUCTURADAS ---
+            const activeKillerCoords = getKillerCoords();
+            const downedSurvivors = (currentRole === 'survivor' ? survivors.concat([player]) : survivors).filter(s => s && s.state === 'DOWN');
+
+            // Determinar si Golf Ball está presente y con vida (Golf Ball es el jugador en Survivor, o el bot "Golf Ball" en Killer)
+            let golfBallEntity = null;
+            if (currentRole === 'survivor') {
+                golfBallEntity = player;
+            } else {
+                golfBallEntity = survivors.find(s => s.name === 'Golf Ball');
+            }
+
+            downedSurvivors.forEach(ds => {
+                const distToMecha = Math.hypot(ds.x - activeKillerCoords.x, ds.y - activeKillerCoords.y);
+                
+                if (distToMecha < 160) {
+                    // UNIVERSAL: El temporizador se rellena en lugar de disminuir cuando te campean
+                    ds.downTimer = Math.min(900, (ds.downTimer || 0) + 1.5);
+
+                    // PASIVA GOLF BALL: Detonación electromagnética de rescate
+                    // Se activa si la propia Golf Ball está caída y campeada, O si Golf Ball está viva y se acerca al caído a rescatarlo (dist < 180)
+                    let isGolfBallRescuing = golfBallEntity && golfBallEntity.state === 'NORMAL' && Math.hypot(ds.x - golfBallEntity.x, ds.y - golfBallEntity.y) < 180;
+                    let isGolfBallCampedSelf = (ds === golfBallEntity);
+
+                    if (isGolfBallRescuing || isGolfBallCampedSelf) {
+                        ds.campTimer = (ds.campTimer || 0) + 1;
+                        if (ds.campTimer > 150) { // 2.5 segundos de campeo continuos
+                            // Repulsión contra Mecha
+                            const angle = Math.atan2(activeKillerCoords.y - ds.y, activeKillerCoords.x - ds.x);
+                            const pushForce = 22; 
+                            
+                            if (currentRole === 'survivor') {
+                                killer.vx = Math.cos(angle) * pushForce;
+                                killer.vy = -10;
+                                killer.stuckFrames = 0;
+                            } else {
+                                player.vx = Math.cos(angle) * pushForce;
+                                player.vy = -10;
+                            }
+
+                            // Auto-revivir sobreviviente con escudo
+                            ds.state = 'NORMAL';
+                            ds.health = 50; 
+                            ds.speedBoostTimer = 240; // Super velocidad explosiva (2.3x)
+                            ds.campTimer = 0;
+
+                            triggerSystemAlert(`¡PASIVA DE GOLF BALL: ONDA DETONADORA ANTICAMPEO!`);
+                            playSound('boost');
+
+                            // Partículas de EMP cian
+                            for(let i = 0; i < 35; i++) {
+                                const angleP = Math.random() * Math.PI * 2;
+                                const speedP = Math.random() * 10 + 5;
+                                particles.push({
+                                    x: ds.x,
+                                    y: ds.y,
+                                    vx: Math.cos(angleP) * speedP,
+                                    vy: Math.sin(angleP) * speedP,
+                                    r: Math.random() * 5 + 3,
+                                    color: '#22d3ee',
+                                    life: 40
+                                });
+                            }
+                        }
+                    }
+                } else {
+                    ds.campTimer = Math.max(0, (ds.campTimer || 0) - 1.5);
+                }
+            });
+
+            // Procesamiento de movimiento y estados del jugador
+            if (player.state === 'NORMAL' || currentRole === 'killer') {
+                let currentSpeed = player.speed;
+                if (player.speedBoostTimer > 0) {
+                    currentSpeed *= 2.3; // Aumentado boost explosivo al sufrir daño a 2.3x
+                    player.speedBoostTimer--;
+                }
+
+                if (player.trackerSlowTimer > 0) {
+                    currentSpeed *= 0.35; 
+                }
+
+                player.vx = moveX * currentSpeed;
+
+                if (moveX !== 0) {
+                    player.faceDir = moveX > 0 ? 1 : -1;
+                }
+
+                // Rodamiento táctico por caída alta
+                if (player.rollTimer > 0) {
+                    player.rollTimer--;
+                    player.vx = player.faceDir * player.speed * 2.5; // Excelente propulsión de rodamiento
+                    player.isRolling = true;
+                    // Generar polvo de rodamiento continuo
+                    if (internalFrameCounter % 2 === 0) {
+                        particles.push({
+                            x: player.x,
+                            y: player.y + player.r - 2,
+                            vx: -player.faceDir * 3,
+                            vy: -Math.random() * 2,
+                            r: Math.random() * 4 + 1.5,
+                            color: '#e2e8f0',
+                            life: 15
+                        });
+                    }
+                } else {
+                    player.isRolling = false;
+                }
+
+                const wantsToJump = keys['w'] || keys['arrowup'] || keys[' '] || mobileJumpActive;
+                
+                if (wantsToJump && player.onGround && !(player.buildingSpeedpadTimer > 0)) {
+                    let jPower = player.jumpPower;
+                    if (player.jumpBoostActive) {
+                        jPower *= 1.8;
+                        player.jumpBoostActive = false;
+                        playSound('boost');
+                        
+                        for(let i=0; i<10; i++) {
+                            particles.push({
+                                x: player.x,
+                                y: player.y + player.r,
+                                vx: (Math.random()-0.5)*4,
+                                vy: Math.random()*3 + 1,
+                                r: Math.random()*3+1,
+                                color: '#38bdf8',
+                                life: 20
+                            });
+                        }
+                    } else {
+                        playSound('jump');
+                    }
+                    player.vy = -jPower;
+                    player.onGround = false;
+                    player.fallHeightStart = player.y; // Registrar altura de inicio de caída al saltar
+                }
+            } else if (player.state === 'DOWN') {
+                player.vx = moveX * 0.5;
+                player.vy = 2;
+                
+                // Regla universal de campeo: Si Mecha está cerca del jugador caído, el temporizador NO disminuye, al contrario se rellena
+                const distToMecha = Math.hypot(player.x - activeKillerCoords.x, player.y - activeKillerCoords.y);
+                if (distToMecha < 160) {
+                    player.downTimer = Math.min(900, player.downTimer + 1.5);
+                } else {
+                    player.downTimer--;
+                }
+
+                if (player.downTimer <= 0) {
+                    player.state = 'DEAD';
+                    triggerSystemAlert("Tu núcleo de energía colapsó permanentemente.");
+                }
+            }
+
+            // Historial para detección de atascamiento del jugador (si es mecha)
+            if (internalFrameCounter % 10 === 0) {
+                player.lastX = player.x;
+            }
+
+            player.x += player.vx * currentSpeedDilation;
+            player.y += player.vy * currentSpeedDilation;
+
+            handleCollisions(player);
+
+            // Detección de aterrizaje para rodamiento
+            if (player.onGround && player.vy === 0) {
+                const fallHeight = player.y - player.fallHeightStart;
+                if (fallHeight > 150) { // Altura reducida para que sea más fácil de encadenar
+                    player.rollTimer = 60; // Iniciar rodamiento con boost óptimo
+                    triggerSystemAlert("¡RODAMIENTO TÁCTICO AMORTIGUADOR!");
+                    playSound('boost');
+                }
+                player.fallHeightStart = player.y;
+            }
+
+            if (currentRole === 'survivor') {
+                updateKillerBot();
+            }
+
+            updateSurvivorBots();
+
+            // --- COLISIONES Y DURACIÓN CON SPEEDPADS ---
+            for (let pIdx = speedPads.length - 1; pIdx >= 0; pIdx--) {
+                const pad = speedPads[pIdx];
+                pad.life--;
+                
+                let usedPad = false;
+                const checkBoost = (entity) => {
+                    if (entity.x > pad.x - pad.w/2 && entity.x < pad.x + pad.w/2 &&
+                        entity.y + entity.r >= pad.y - 12 && entity.y + entity.r <= pad.y + 12) {
+                        entity.speedBoostTimer = 180;
+                        usedPad = true;
+
+                        for (let i = 0; i < 3; i++) {
+                            particles.push({
+                                x: entity.x,
+                                y: entity.y + entity.r,
+                                vx: entity.faceDir * 4,
+                                vy: (Math.random() - 0.5) * 2,
+                                r: Math.random() * 2 + 1,
+                                color: '#38bdf8',
+                                life: 20,
+                                style: 'arrow_speed'
+                            });
+                        }
+                    }
+                };
+
+                checkBoost(player);
+                survivors.forEach(checkBoost);
+
+                // LMS RULE: El speedpad en LMS desaparece de inmediato tras el primer uso
+                if ((pad.isLmsPad && usedPad) || pad.life <= 0) {
+                    speedPads.splice(pIdx, 1);
+                }
+            }
+
+            // --- DRONES TÁCTICOS ---
+            activeDrones.forEach((drone, dIdx) => {
+                if (drone.buildProgress < drone.buildMax) {
+                    drone.buildProgress += 1; 
+                    return; 
+                }
+
+                drone.pulseWave += 0.05;
+                if (drone.pulseWave > 1) drone.pulseWave = 0;
+
+                const targets = (currentRole === 'survivor' ? survivors.concat([player]) : survivors).filter(s => s && s.state === 'NORMAL');
+                targets.forEach(t => {
+                    const dist = Math.hypot(t.x - drone.x, t.y - drone.y);
+                    if (dist < drone.radarRadius && drone.shootCd <= 0) {
+                        applyBurnEffect(t, 2, 180); // Daño moderado de quemadura
+                        drone.shootCd = 350; 
+                        playSound('laser');
+                        particles.push({
+                            x: drone.x,
+                            y: drone.y,
+                            targetX: t.x,
+                            targetY: t.y,
+                            color: '#ef4444',
+                            life: 25,
+                            style: 'laser_beam'
+                        });
+                    }
+                });
+
+                if (drone.shootCd > 0) drone.shootCd--;
+            });
+
+            // --- QUEMADURA ---
+            const applyBurnTick = (entity) => {
+                if (!entity || entity.state !== 'NORMAL' || isKiller(entity)) return;
+                if (entity.burnTimer > 0) {
+                    entity.burnTimer--;
+                    if (entity.burnTimer % 45 === 0) { 
+                        entity.health -= entity.burnStrength;
+                        particles.push({
+                            x: entity.x + (Math.random() - 0.5) * 10,
+                            y: entity.y + (Math.random() - 0.5) * 10,
+                            vx: 0, vy: -1.5,
+                            r: Math.random() * 3 + 1,
+                            color: '#f97316',
+                            life: 20
+                        });
+                        if (entity.health <= 0) {
+                            applyDamage(entity, 0);
+                        }
+                    }
+                }
+            };
+            applyBurnTick(player);
+            survivors.forEach(applyBurnTick);
+
+            // --- PROYECTILES ---
+            for (let i = projectiles.length - 1; i >= 0; i--) {
+                const proj = projectiles[i];
+                if (!proj) continue;
+                proj.x += proj.vx * currentSpeedDilation;
+                proj.y += proj.vy * currentSpeedDilation;
+
+                if (proj.x < 0 || proj.x > WORLD_WIDTH || proj.y > WORLD_HEIGHT) {
+                    projectiles.splice(i, 1);
+                    continue;
+                }
+
+                if (proj.danger) {
+                    let targetList = currentRole === 'survivor' ? survivors.concat([player]) : survivors;
+                    let hitRegistered = false;
+
+                    for (let t of targetList) {
+                        if (t && t.state === 'NORMAL') {
+                            const dist = Math.hypot(t.x - proj.x, t.y - proj.y);
+                            if (dist < t.r + proj.r) {
+                                applyDamage(t, 12); // Reducido el daño de proyectil a 12 para un juego más justo
+                                applyBurnEffect(t, 1, 300); 
+                                hitRegistered = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (hitRegistered) {
+                        projectiles.splice(i, 1);
+                        continue;
+                    }
+                }
+            }
+
+            // --- PUNTOS DE ESCAPE ---
+            if (ringEscapesSpawned) {
+                escapeRings.forEach(ring => {
+                    const dist = Math.hypot(player.x - ring.x, player.y - ring.y);
+                    if (dist < player.r + ring.r && currentRole === 'survivor' && player.state === 'NORMAL') {
+                        endGame(true, "¡Escapaste con vida! Tus destrezas mecánicas superaron a la IA.");
+                    }
+
+                    survivors.forEach(s => {
+                        if (s.state === 'NORMAL') {
+                            const sDist = Math.hypot(s.x - ring.x, s.y - ring.y);
+                            if (sDist < s.r + ring.r) {
+                                s.state = 'DEAD';
+                                triggerSystemAlert(`¡${s.name} ha evacuado de la fábrica!`);
+                            }
+                        }
+                    });
+                });
+            }
+
+            // --- SISTEMA UNIFICADO DE RESCATES ---
+            const allActiveEntities = currentRole === 'survivor' ? survivors.concat([player]) : survivors;
+            const allDownedEntities = currentRole === 'survivor' ? survivors.concat([player]) : survivors;
+
+            allActiveEntities.forEach(activator => {
+                if (activator && activator.state === 'NORMAL') {
+                    allDownedEntities.forEach(downed => {
+                        if (downed && downed.state === 'DOWN' && activator !== downed) {
+                            const dist = Math.hypot(activator.x - downed.x, activator.y - downed.y);
+                            if (dist < (activator.r + downed.r + 15)) {
+                                downed.state = 'NORMAL';
+                                downed.health = 50; 
+                                downed.downTimer = 0;
+                                playSound('boost');
+                                triggerSystemAlert(`¡${activator.name} reactivó y salvó a ${downed.name}!`);
+                                
+                                for(let i=0; i<12; i++) {
+                                    particles.push({
+                                        x: downed.x,
+                                        y: downed.y,
+                                        vx: (Math.random()-0.5)*4,
+                                        vy: (Math.random()-0.5)*4 - 1,
+                                        r: Math.random()*3+2,
+                                        color: '#10b981',
+                                        life: 30
+                                    });
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+
+            // --- LÍMITES MUNDIALES ---
+            player.x = Math.max(player.r, Math.min(WORLD_WIDTH - player.r, player.x));
+            player.y = Math.max(player.r, Math.min(WORLD_HEIGHT - player.r, player.y));
+
+            let cw = canvas.width || 800;
+            let ch = canvas.height || 600;
+            let targetCamX = player.x - cw / 2;
+            let targetCamY = player.y - ch / 2;
+
+            camera.x += (targetCamX - camera.x) * 0.15;
+            camera.y += (targetCamY - camera.y) * 0.15;
+
+            if (isNaN(camera.x) || camera.x === undefined) camera.x = 0;
+            if (isNaN(camera.y) || camera.y === undefined) camera.y = 0;
+
+            camera.x = Math.max(0, Math.min(WORLD_WIDTH - cw, camera.x));
+            camera.y = Math.max(0, Math.min(WORLD_HEIGHT - ch, camera.y));
+
+            updateParticles();
+
+            // Decremento de emotes del player y del killer
+            if (player.emoteTimer > 0) player.emoteTimer--;
+            if (killer.emoteTimer > 0) killer.emoteTimer--;
+
+            if (activeTrackerArrow > 0) activeTrackerArrow--;
+            if (activeGlobalEye > 0) activeGlobalEye--;
+
+            if (currentRole === 'survivor') {
+                if (player.state === 'DEAD') {
+                    endGame(false, "El Mecha Golf Ball asimiló tu núcleo cuántico.");
+                }
+                const activeOnes = survivors.filter(s => s.state === 'NORMAL' || s.state === 'DOWN').length;
+                if (activeOnes === 0 && player.state === 'DEAD') {
+                    endGame(false, "Toda la flota de sobrevivientes fue reducida.");
+                }
+            } else {
+                const survivorsLeft = survivors.filter(s => s.state === 'NORMAL' || s.state === 'DOWN').length;
+                if (survivorsLeft === 0) {
+                    endGame(true, "Captura absoluta. La fábrica ha sido depurada.");
+                }
+                if (ringEscapesSpawned && survivorsLeft > 0 && postTimerSeconds >= 100) {
+                    endGame(false, "Demasiados objetivos escaparon por el portal holográfico.");
+                }
+            }
+
+            updateSurvivorsHudList();
+        }
+
+        // Manejo físico de colisiones
+        function handleCollisions(entity) {
+            entity.onGround = false;
+
+            platforms.forEach(plat => {
+                if (plat.type === 'fragile' && plat.health <= 0) return;
+
+                if (plat.type === 'ramp') {
+                    if (entity.x + entity.r > plat.x && entity.x - entity.r < plat.x + plat.w) {
+                        const relativeX = (entity.x - plat.x) / plat.w;
+                        let targetY = plat.y + plat.h;
+                        if (plat.slope === -1) {
+                            targetY = plat.y + plat.h - (relativeX * plat.h);
+                        } else {
+                            targetY = plat.y + (relativeX * plat.h);
+                        }
+
+                        if (entity.y + entity.r >= targetY - 10 && entity.y + entity.r <= targetY + 15 && entity.vy >= 0) {
+                            entity.y = targetY - entity.r;
+                            entity.vy = 0;
+                            entity.onGround = true;
+                        }
+                    }
+                } 
+                else if (plat.type === 'moving') {
+                    plat.x += plat.speed * plat.dir;
+                    if (plat.x > plat.xEnd || plat.x < plat.xStart) {
+                        plat.dir *= -1;
+                    }
+
+                    if (entity.x + entity.r > plat.x && entity.x - entity.r < plat.x + plat.w &&
+                        entity.y + entity.r >= plat.y && entity.y - entity.r < plat.y + plat.h) {
+                        
+                        if (entity.vy >= 0 && entity.y + entity.r - entity.vy <= plat.y + 12) {
+                            entity.y = plat.y - entity.r;
+                            entity.vy = 0;
+                            entity.onGround = true;
+                            entity.x += plat.speed * plat.dir;
+                        }
+                    }
+                }
+                else if (plat.type === 'conveyor') {
+                    if (entity.x + entity.r > plat.x && entity.x - entity.r < plat.x + plat.w &&
+                        entity.y + entity.r >= plat.y && entity.y - entity.r < plat.y + plat.h) {
+                        
+                        if (entity.vy >= 0 && entity.y + entity.r - entity.vy <= plat.y + 12) {
+                            entity.y = plat.y - entity.r;
+                            entity.vy = 0;
+                            entity.onGround = true;
+                            entity.x += plat.speed * plat.dir; 
+                        }
+                    }
+                }
+                else if (plat.type === 'spring') {
+                    if (entity.x + entity.r > plat.x && entity.x - entity.r < plat.x + plat.w &&
+                        entity.y + entity.r >= plat.y && entity.y - entity.r < plat.y + plat.h) {
+                        
+                        if (entity.vy >= 0) {
+                            entity.vy = -plat.force;
+                            playSound('jump');
+                            particles.push({
+                                x: plat.x + plat.w/2,
+                                y: plat.y,
+                                vx: 0, vy: -2,
+                                r: 5,
+                                color: '#a1a1aa',
+                                life: 15
+                            });
+                        }
+                    }
+                }
+                else {
+                    if (entity.x + entity.r > plat.x && entity.x - entity.r < plat.x + plat.w &&
+                        entity.y + entity.r >= plat.y && entity.y - entity.r < plat.y + plat.h) {
+                        
+                        if (plat.oneWay) {
+                            if (entity.vy >= 0 && entity.y + entity.r - entity.vy <= plat.y + 12) {
+                                entity.y = plat.y - entity.r;
+                                entity.vy = 0;
+                                entity.onGround = true;
+
+                                if (plat.type === 'fragile') {
+                                    plat.health -= 0.5;
+                                    if (plat.health <= 0) {
+                                        playSound('hurt');
+                                        triggerSystemAlert("¡PLATAFORMA CRÍTICA COMPROMETIDA!");
+                                    }
+                                }
+                            }
+                        } else {
+                            if (entity.vy >= 0 && entity.y + entity.r - entity.vy <= plat.y + 12) {
+                                entity.y = plat.y - entity.r;
+                                entity.vy = 0;
+                                entity.onGround = true;
+                            } 
+                            else if (entity.vy < 0 && entity.y - entity.r - entity.vy >= plat.y + plat.h - 12) {
+                                entity.y = plat.y + plat.h + entity.r;
+                                entity.vy = 0;
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- INTELIGENCIA ARTIFICIAL HUMANA PARA EL ASESINO (MECHA BOT) ---
+        let lastSeenSurvivor = null;
+        let chaseLostTimer = 0;
+
+        function updateKillerBot() {
+            killer.vy += GRAVITY;
+
+            // Historial periódico de coordenadas para detectar si está atascado en un muro
+            // REACCIÓN MÁS LENTA: Se modificó el intervalo a 45 frames (0.75s) para una toma de decisiones más natural e imperfecta
+            if (internalFrameCounter % 45 === 0) {
+                if (Math.abs(killer.x - killer.lastX) < 4.0 && killer.vx !== 0 && killer.onGround) {
+                    killer.stuckFrames++;
+                    if (killer.stuckFrames > 2) { 
+                        // Entrada fuerte para desatascarse (Supersalto vertical y propulsión correctiva)
+                        killer.vy = -killer.jumpPower * 1.25;
+                        killer.vx = (killer.x > WORLD_WIDTH / 2) ? -killer.speed * 1.5 : killer.speed * 1.5;
+                        killer.patrolGoalX = killer.x + (killer.x > WORLD_WIDTH / 2 ? -600 : 600);
+                        killer.stuckFrames = 0;
+                        triggerSystemAlert("¡MECHA BOT DETECTÓ BLOQUEO! Liberando sobrecarga de salto.");
+                        
+                        // Partículas de desatasco
+                        for (let i = 0; i < 15; i++) {
+                            particles.push({
+                                x: killer.x,
+                                y: killer.y + killer.r,
+                                vx: (Math.random() - 0.5) * 8,
+                                vy: -Math.random() * 5 - 2,
+                                r: Math.random() * 4 + 2,
+                                color: '#ef4444',
+                                life: 20
+                            });
+                        }
+                    }
+                } else {
+                    killer.stuckFrames = 0;
+                }
+                killer.lastX = killer.x;
+            }
+
+            // REACCIÓN LENTA: Tomar decisiones solo cada 45 fotogramas
+            if (internalFrameCounter % 45 === 0) {
+                let visibleTargets = survivors.concat([player]).filter(s => s && s.state === 'NORMAL' && Math.hypot(s.x - killer.x, s.y - killer.y) < 600);
+                
+                let nearestTarget = null;
+                let minDist = 99999;
+
+                visibleTargets.forEach(t => {
+                    const dist = Math.hypot(t.x - killer.x, t.y - killer.y);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        nearestTarget = t;
+                    }
+                });
+
+                if (nearestTarget) {
+                    lastSeenSurvivor = nearestTarget;
+                    chaseLostTimer = 180; 
+                } else {
+                    if (chaseLostTimer > 0) chaseLostTimer--;
+                }
+
+                if (nearestTarget) {
+                    killer.botGoalTarget = nearestTarget;
+                    killer.state = 'CHASING';
+                } else if (lastSeenSurvivor && chaseLostTimer > 0) {
+                    killer.botGoalTarget = lastSeenSurvivor; 
+                    killer.state = 'INVESTIGATING';
+                } else {
+                    killer.state = 'PATROLLING';
+                    killer.botGoalTarget = null;
+                    if (Math.random() < 0.08) {
+                        killer.patrolGoalX = Math.random() * WORLD_WIDTH;
+                    }
+                }
+                
+                // Provocar ocasionalmente emotes cosméticos del bot
+                if (Math.random() < 0.03 && killer.state === 'CHASING') {
+                    killer.emoteTimer = 120;
+                    killer.activeEmote = 'mecha_laugh';
+                }
+            }
+
+            let goalTarget = killer.botGoalTarget;
+
+            if (goalTarget) {
+                const dirX = goalTarget.x > killer.x ? 1 : -1;
+                killer.faceDir = dirX;
+                killer.vx = dirX * killer.speed;
+
+                if (Math.abs(goalTarget.x - killer.x) < 8) {
+                    killer.vx = 0;
+                }
+
+                if (goalTarget.y < killer.y - 50 && Math.random() < 0.06 && killer.onGround) {
+                    killer.vy = -killer.jumpPower;
+                }
+
+                const directDist = Math.hypot(goalTarget.x - killer.x, goalTarget.y - killer.y);
+                if (directDist < 55 && killer.attackCd <= 0 && goalTarget.state === 'NORMAL') {
+                    applyDamage(goalTarget, 10); 
+                    killer.attackCd = 60; 
+                }
+
+                if (directDist > 120 && directDist < 380 && killer.skillCd1 <= 0 && Math.random() < 0.02) {
+                    playSound('laser');
+                    const shootAngle = Math.atan2(goalTarget.y - killer.y, goalTarget.x - killer.x);
+                    projectiles.push({
+                        x: killer.x,
+                        y: killer.y,
+                        vx: Math.cos(shootAngle) * 11.5,
+                        vy: Math.sin(shootAngle) * 11.5,
+                        r: 10,
+                        color: '#f97316',
+                        type: 'fire',
+                        danger: true
+                    });
+                    killer.skillCd1 = 10 * 60; 
+                }
+            } else {
+                const targetX = killer.patrolGoalX || (WORLD_WIDTH / 2);
+                const dirX = targetX > killer.x ? 1 : -1;
+                killer.faceDir = dirX;
+                killer.vx = dirX * (killer.speed * 0.7);
+
+                if (Math.abs(targetX - killer.x) < 15) {
+                    killer.vx = 0;
+                }
+
+                if (Math.random() < 0.02 && killer.onGround) {
+                    killer.vy = -killer.jumpPower;
+                }
+            }
+
+            if (killer.skillCd2 <= 0 && Math.random() < 0.005) {
+                if (activeDrones.length >= 4) {
+                    activeDrones.shift();
+                }
+                playSound('drone');
+                activeDrones.push({
+                    x: killer.x,
+                    y: killer.y - 25,
+                    r: 15,
+                    radarRadius: 130,
+                    shootCd: 0,
+                    pulseWave: 0,
+                    buildProgress: 0,
+                    buildMax: 120
+                });
+                killer.skillCd2 = 16 * 60; 
+                triggerSystemAlert("¡Mecha Golf Ball desplegó un Dron!");
+            }
+
+            if (killer.state === 'PATROLLING' && killer.skillCd3 <= 0 && Math.random() < 0.01) {
+                activeGlobalEye = 300; 
+                killer.skillCd3 = 20 * 60;
+                playSound('tracker');
+                triggerSystemAlert("¡Mecha Golf Ball activó el radar global!");
+            }
+
+            if (killer.attackCd > 0) killer.attackCd--;
+            if (killer.skillCd1 > 0) killer.skillCd1--;
+            if (killer.skillCd2 > 0) killer.skillCd2--;
+            if (killer.skillCd3 > 0) killer.skillCd3--;
+
+            killer.x += killer.vx;
+            killer.y += killer.vy;
+
+            handleCollisions(killer);
+            killer.x = Math.max(killer.r, Math.min(WORLD_WIDTH - killer.r, killer.x));
+        }
+
+        // --- INTELIGENCIA ARTIFICIAL HUMANA PARA LOS SOBREVIVIENTES BOTS ---
+        function updateSurvivorBots() {
+            survivors.forEach(s => {
+                if (s.state === 'DEAD') return;
+
+                if (s.state === 'DOWN') {
+                    // Regla universal de campeo para bots caídos: Si Mecha está cerca, se regenera la batería
+                    const killerCoords = getKillerCoords();
+                    const distToMecha = Math.hypot(s.x - killerCoords.x, s.y - killerCoords.y);
+                    if (distToMecha < 160) {
+                        s.downTimer = Math.min(900, (s.downTimer || 0) + 1.5);
+                    } else {
+                        s.downTimer--;
+                    }
+
+                    if (s.downTimer <= 0) {
+                        s.state = 'DEAD';
+                        triggerSystemAlert(`Sujeto ${s.name} ha sido desactivado permanentemente.`);
+                    }
+                    return;
+                }
+
+                s.vy += GRAVITY;
+
+                // Historial de atascamiento en muros/esquinas para sobrevivientes bots
+                // REACCIÓN MÁS LENTA: Se modificó a 45 frames para una verificación más pausada
+                if (internalFrameCounter % 45 === 0) {
+                    if (Math.abs(s.x - s.lastX) < 4.0 && s.vx !== 0 && s.onGround) {
+                        s.stuckFrames++;
+                        if (s.stuckFrames > 2) { 
+                            // Supersalto táctico para librarse y cambio agresivo de trayectoria
+                            s.vy = -s.jumpPower * 1.3; 
+                            s.vx = (s.x > WORLD_WIDTH / 2) ? -s.speed * 1.4 : s.speed * 1.4;
+                            s.patrolTargetX = s.x + (s.x > WORLD_WIDTH / 2 ? -500 : 500); 
+                            s.stuckFrames = 0;
+                            
+                            // Partículas de salto de escape
+                            for (let i = 0; i < 10; i++) {
+                                particles.push({
+                                    x: s.x,
+                                    y: s.y + s.r,
+                                    vx: (Math.random() - 0.5) * 6,
+                                    vy: -Math.random() * 4 - 2,
+                                    r: Math.random() * 3 + 1,
+                                    color: '#10b981',
+                                    life: 15
+                                });
+                            }
+                        }
+                    } else {
+                        s.stuckFrames = 0;
+                    }
+                    s.lastX = s.x;
+                }
+
+                // REACCIÓN LENTA: Tomar decisiones tácticas cada 45 fotogramas
+                if (internalFrameCounter % 45 === 0) {
+                    const killerCoords = getKillerCoords();
+                    const distToKiller = Math.hypot(killerCoords.x - s.x, killerCoords.y - s.y);
+                    const knowsKillerLoc = distToKiller < 500;
+
+                    const allTeam = currentRole === 'survivor' ? survivors.concat([player]) : survivors;
+                    let downedAlly = allTeam.find(a => a && a.state === 'DOWN');
+
+                    let choiceX = s.x;
+
+                    if (ringEscapesSpawned) {
+                        let nearestRing = null;
+                        let minRingDist = 99999;
+                        escapeRings.forEach(r => {
+                            const rd = Math.hypot(r.x - s.x, r.y - s.y);
+                            if (rd < minRingDist) {
+                                minRingDist = rd;
+                                nearestRing = r;
+                            }
+                        });
+                        if (nearestRing) {
+                            choiceX = nearestRing.x;
+                            if (nearestRing.y < s.y - 50 && s.onGround && Math.random() < 0.08) {
+                                s.vy = -s.jumpPower;
+                            }
+                        }
+                    } 
+                    else if (knowsKillerLoc && distToKiller < 300) {
+                        choiceX = s.x + (s.x > killerCoords.x ? 380 : -380);
+                        
+                        if (distToKiller < 140 && s.onGround && Math.random() < 0.12) {
+                            s.vy = -s.jumpPower;
+                        }
+
+                        if (s.speedpadCd <= 0 && Math.random() < 0.05) {
+                            speedPads.push({
+                                x: s.x,
+                                y: s.y + s.r - 5,
+                                w: 60,
+                                h: 10,
+                                life: 600,
+                                maxLife: 600
+                            });
+                            s.speedpadCd = 45 * 60; 
+                        }
+
+                        if (s.jumpboostCd <= 0 && Math.random() < 0.02) {
+                            s.jumpPower *= 1.7; 
+                            s.jumpboostCd = 25 * 60;
+                            setTimeout(() => { s.jumpPower /= 1.7; }, 2000);
+                        }
+                    } 
+                    else if (downedAlly) {
+                        choiceX = downedAlly.x;
+                        if (downedAlly.y < s.y - 50 && s.onGround && Math.random() < 0.05) {
+                            s.vy = -s.jumpPower;
+                        }
+                    } 
+                    else {
+                        if (Math.random() < 0.1) {
+                            s.patrolTargetX = s.x + (Math.random() - 0.5) * 600;
+                        }
+                        choiceX = s.patrolTargetX || s.x;
+
+                        if (Math.random() < 0.03 && s.onGround) {
+                            s.vy = -s.jumpPower;
+                        }
+                    }
+
+                    s.botDecisionTargetX = choiceX;
+
+                    // Ocasionalmente reproducir emote en bots aliados
+                    if (Math.random() < 0.02) {
+                        s.emoteTimer = 100;
+                        s.activeEmote = 'calculation';
+                    }
+                }
+
+                let targetX = s.botDecisionTargetX !== undefined ? s.botDecisionTargetX : s.x;
+                let moveDir = 0;
+                if (Math.abs(targetX - s.x) > 10) {
+                    moveDir = targetX > s.x ? 1 : -1;
+                }
+
+                let currentSpeed = s.speed;
+                if (s.speedBoostTimer > 0) {
+                    currentSpeed *= 2.3; // Boost de daño de velocidad explosiva de 2.3x también para bots
+                    s.speedBoostTimer--;
+                }
+
+                s.vx = moveDir * currentSpeed;
+
+                if (moveDir !== 0) {
+                    s.faceDir = moveDir;
+                }
+
+                // Rodamiento táctico por caída alta para bots sobrevivientes
+                if (s.rollTimer > 0) {
+                    s.rollTimer--;
+                    s.vx = s.faceDir * s.speed * 2.2;
+                    s.isRolling = true;
+                    if (internalFrameCounter % 3 === 0) {
+                        particles.push({
+                            x: s.x,
+                            y: s.y + s.r - 2,
+                            vx: -s.faceDir * 2,
+                            vy: -Math.random(),
+                            r: Math.random() * 3 + 1,
+                            color: '#e2e8f0',
+                            life: 15
+                        });
+                    }
+                } else {
+                    s.isRolling = false;
+                }
+
+                // Si se mueven, se cancela el emote
+                if (s.vx !== 0 || s.vy !== 0) {
+                    s.emoteTimer = 0;
+                    s.activeEmote = null;
+                }
+
+                if (s.speedpadCd > 0) s.speedpadCd--;
+                if (s.jumpboostCd > 0) s.jumpboostCd--;
+
+                s.x += s.vx;
+                s.y += s.vy;
+
+                handleCollisions(s);
+
+                // Detección de aterrizaje para bots (Rodamiento táctico amortiguador)
+                if (s.onGround && s.vy === 0) {
+                    const fallHeight = s.y - s.fallHeightStart;
+                    if (fallHeight > 150) {
+                        s.rollTimer = 60; // Iniciar rodamiento y aceleración
+                        playSound('boost');
+                    }
+                    s.fallHeightStart = s.y;
+                }
+
+                s.x = Math.max(s.r, Math.min(WORLD_WIDTH - s.r, s.x));
+            });
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // CUBIERTA TOTAL AL VOLVER AL MENÚ (Evita que se vea la partida anterior)
+            if (!gameActive && document.getElementById('lobby-screen').className.indexOf('hidden') === -1) {
+                ctx.fillStyle = '#050811';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+
+            ctx.save();
+            
+            let shakeX = (Math.random() - 0.5) * cameraShake;
+            let shakeY = (Math.random() - 0.5) * cameraShake;
+            ctx.translate(-camera.x + shakeX, -camera.y + shakeY);
+
+            if (timeRemaining <= 0) {
+                ctx.fillStyle = 'rgba(10, 15, 30, 0.45)';
+                ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+            }
+
+            ctx.strokeStyle = 'rgba(30, 41, 59, 0.4)';
+            ctx.lineWidth = 1;
+            const size = 50;
+            for (let x = 0; x < WORLD_WIDTH; x += size) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, WORLD_HEIGHT);
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.35)';
+            ctx.fillRect(400, 200, 100, 800);
+            ctx.fillRect(1700, 100, 140, 900);
+            ctx.fillRect(3200, 250, 90, 750);
+            ctx.fillRect(4400, 150, 110, 850);
+
+            // --- RENDERIZADO DE SPEEDPADS (Con barra de duración) ---
+            speedPads.forEach(pad => {
+                ctx.fillStyle = '#0284c7';
+                ctx.fillRect(pad.x - pad.w/2, pad.y, pad.w, pad.h);
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(pad.x - 15, pad.y + 5);
+                ctx.lineTo(pad.x, pad.y + 2);
+                ctx.lineTo(pad.x + 15, pad.y + 5);
+                ctx.stroke();
+
+                // BARRA DE TIEMPO DE DURACIÓN DEL SPEEDPAD
+                const lifePct = Math.max(0, pad.life / (pad.maxLife || 600));
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+                ctx.fillRect(pad.x - pad.w/2, pad.y + pad.h + 2, pad.w, 4);
+                ctx.fillStyle = pad.isLmsPad ? '#ec4899' : '#38bdf8';
+                ctx.fillRect(pad.x - pad.w/2, pad.y + pad.h + 2, pad.w * lifePct, 4);
+            });
+
+            if (ringEscapesSpawned) {
+                escapeRings.forEach(ring => {
+                    ctx.save();
+                    ctx.shadowColor = '#10b981';
+                    ctx.shadowBlur = 20;
+                    ctx.strokeStyle = '#10b981';
+                    ctx.lineWidth = 6;
+                    ctx.beginPath();
+                    ctx.arc(ring.x, ring.y, ring.r, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+                    ctx.fill();
+                    ctx.restore();
+                });
+            }
+
+            platforms.forEach(plat => {
+                if (plat.type === 'fragile' && plat.health <= 0) return;
+
+                ctx.save();
+                if (plat.type === 'fragile') {
+                    const lifeFactor = plat.health / plat.maxHealth;
+                    ctx.fillStyle = `rgba(245, 158, 11, ${0.4 + lifeFactor * 0.6})`;
+                    ctx.strokeStyle = '#ef4444';
+                    ctx.lineWidth = 3;
+                    ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+                    ctx.strokeRect(plat.x, plat.y, plat.w, plat.h);
+                } 
+                else if (plat.type === 'moving') {
+                    ctx.fillStyle = '#475569';
+                    ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+                    ctx.strokeStyle = '#fbbf24';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(plat.x, plat.y, plat.w, plat.h);
+                }
+                else if (plat.type === 'conveyor') {
+                    ctx.fillStyle = '#334155';
+                    ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+                    ctx.strokeStyle = '#fbbf24';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(plat.x, plat.y, plat.w, plat.h);
+                    
+                    ctx.strokeStyle = '#475569';
+                    ctx.lineWidth = 3;
+                    const offset = (internalFrameCounter * 2 * plat.dir) % 20;
+                    for (let lx = plat.x + offset - 20; lx < plat.x + plat.w; lx += 20) {
+                        if (lx >= plat.x && lx <= plat.x + plat.w) {
+                            ctx.beginPath();
+                            ctx.moveTo(lx, plat.y);
+                            ctx.lineTo(lx + 8, plat.y + plat.h);
+                            ctx.stroke();
+                        }
+                    }
+                }
+                else if (plat.type === 'spring') {
+                    ctx.fillStyle = '#64748b';
+                    ctx.fillRect(plat.x, plat.y + 15, plat.w, plat.h - 15);
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.fillRect(plat.x - 4, plat.y, plat.w + 8, 8);
+                    ctx.strokeStyle = '#334155';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(plat.x, plat.y + 15, plat.w, plat.h - 15);
+                }
+                else if (plat.type === 'ramp') {
+                    ctx.fillStyle = '#1e293b';
+                    ctx.beginPath();
+                    if (plat.slope === -1) {
+                        ctx.moveTo(plat.x, plat.y + plat.h);
+                        ctx.lineTo(plat.x + plat.w, plat.y);
+                        ctx.lineTo(plat.x + plat.w, plat.y + plat.h);
+                    } else {
+                        ctx.moveTo(plat.x, plat.y);
+                        ctx.lineTo(plat.x + plat.w, plat.y + plat.h);
+                        ctx.lineTo(plat.x, plat.y + plat.h);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.strokeStyle = '#334155';
+                    ctx.stroke();
+                }
+                else {
+                    if (plat.oneWay) {
+                        ctx.fillStyle = '#475569';
+                        ctx.fillRect(plat.x, plat.y, plat.w, 8); 
+                        ctx.fillStyle = '#334155';
+                        for (let gx = plat.x + 8; gx < plat.x + plat.w; gx += 20) {
+                            ctx.fillRect(gx, plat.y + 8, 4, plat.h - 8);
+                        }
+                        ctx.strokeStyle = '#64748b';
+                        ctx.lineWidth = 1.5;
+                        ctx.strokeRect(plat.x, plat.y, plat.w, plat.h);
+                    } else {
+                        ctx.fillStyle = '#111827';
+                        ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+                        ctx.strokeStyle = '#1f2937';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(plat.x, plat.y, plat.w, plat.h);
+                    }
+                }
+                ctx.restore();
+            });
+
+            activeDrones.forEach(drone => {
+                ctx.save();
+                
+                if (drone.buildProgress < drone.buildMax) {
+                    const ratio = drone.buildProgress / drone.buildMax;
+                    ctx.strokeStyle = '#38bdf8';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(drone.x, drone.y, drone.r + 5, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * ratio));
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.font = '8px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText("BUILDING...", drone.x, drone.y - 18);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(drone.x, drone.y, drone.radarRadius, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(239, 68, 68, 0.05)';
+                    ctx.fill();
+                    ctx.strokeStyle = `rgba(239, 68, 68, ${0.1 + drone.pulseWave * 0.2})`;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+
+                ctx.fillStyle = '#0f172a';
+                ctx.beginPath();
+                ctx.arc(drone.x, drone.y, drone.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = (drone.buildProgress < drone.buildMax) ? '#475569' : '#ef4444';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                ctx.fillStyle = (drone.buildProgress < drone.buildMax) ? '#94a3b8' : '#ef4444';
+                ctx.shadowColor = '#ef4444';
+                ctx.shadowBlur = (drone.buildProgress < drone.buildMax) ? 0 : 8;
+                ctx.beginPath();
+                ctx.arc(drone.x, drone.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+
+            projectiles.forEach(proj => {
+                ctx.save();
+                ctx.fillStyle = proj.color;
+                ctx.shadowColor = proj.color;
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(proj.x, proj.y, proj.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+
+            particles.forEach((p) => {
+                ctx.save();
+                if (p.style === 'laser_beam') {
+                    ctx.strokeStyle = p.color;
+                    ctx.lineWidth = 4 * (p.life / 25);
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p.targetX, p.targetY);
+                    ctx.stroke();
+                } else if (p.style === 'melee_slash') {
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r * (p.life / 12), 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            });
+
+            survivors.forEach(s => {
+                if (s.state === 'DEAD') return;
+                drawSurvivorEntity(s);
+            });
+
+            if (currentRole === 'survivor') {
+                drawKillerEntity(killer);
+            }
+
+            if (currentRole === 'survivor') {
+                if (player.state !== 'DEAD') {
+                    drawSurvivorEntity(player);
+                }
+            } else {
+                drawKillerEntity(player);
+            }
+
+            ctx.restore();
+
+            const activeTeam = currentRole === 'survivor' ? survivors.concat([player]) : survivors;
+            const downedTarget = activeTeam.find(s => s && s.state === 'DOWN' && s !== player);
+
+            if (downedTarget && player.state === 'NORMAL') {
+                const dx = downedTarget.x - player.x;
+                const dy = downedTarget.y - player.y;
+                const angle = Math.atan2(dy, dx);
+
+                ctx.save();
+                ctx.translate(canvas.width / 2, canvas.height / 2 - 120);
+                ctx.rotate(angle);
+
+                const opacity = 0.5 + Math.sin(internalFrameCounter * 0.1) * 0.5;
+                ctx.fillStyle = `rgba(245, 158, 11, ${opacity})`;
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(40, 0);
+                ctx.lineTo(15, -12);
+                ctx.lineTo(20, -4);
+                ctx.lineTo(-5, -4);
+                ctx.lineTo(-5, 4);
+                ctx.lineTo(20, 4);
+                ctx.lineTo(15, 12);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.rotate(-angle);
+                ctx.fillStyle = '#fbbf24';
+                ctx.font = 'bold 9px monospace';
+                ctx.textBaseline = 'middle';
+                ctx.textAlign = 'center';
+                ctx.fillText(`¡REVIVE A ${downedTarget.name.toUpperCase()}!`, 0, -22);
+                ctx.restore();
+            }
+
+            if (currentRole === 'survivor' && activeTrackerArrow > 0) {
+                const dx = killer.x - player.x;
+                const dy = killer.y - player.y;
+                const dist = Math.hypot(dx, dy);
+                const angle = Math.atan2(dy, dx);
+                const arrowSize = Math.max(10, Math.min(35, (dist / 12)));
+
+                ctx.save();
+                ctx.translate(canvas.width / 2, canvas.height / 2 - 60);
+                ctx.rotate(angle);
+
+                ctx.fillStyle = '#fbbf24';
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(arrowSize, 0);
+                ctx.lineTo(-arrowSize, -arrowSize / 2);
+                ctx.lineTo(-arrowSize / 2, 0);
+                ctx.lineTo(-arrowSize, arrowSize / 2);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            if (currentRole === 'killer' && activeGlobalEye > 0) {
+                survivors.forEach(s => {
+                    if (s.state === 'NORMAL') {
+                        const dx = s.x - player.x;
+                        const dy = s.y - player.y;
+                        const angle = Math.atan2(dy, dx);
+                        
+                        ctx.save();
+                        ctx.translate(canvas.width/2, canvas.height/2);
+                        ctx.rotate(angle);
+                        ctx.fillStyle = '#ef4444';
+                        ctx.beginPath();
+                        ctx.moveTo(120, -10);
+                        ctx.lineTo(140, 0);
+                        ctx.lineTo(120, 10);
+                        ctx.fill();
+                        ctx.restore();
+                    }
+                });
+            }
+
+            if (ringEscapesSpawned && currentRole === 'survivor') {
+                let nearestRing = escapeRings[0];
+                let minDist = 9999;
+                escapeRings.forEach(r => {
+                    const d = Math.hypot(r.x - player.x, r.y - player.y);
+                    if (d < minDist) {
+                        minDist = d;
+                        nearestRing = r;
+                    }
+                });
+
+                const dx = nearestRing.x - player.x;
+                const dy = nearestRing.y - player.y;
+                const angle = Math.atan2(dy, dx);
+
+                ctx.save();
+                ctx.translate(canvas.width/2, canvas.height/2 - 90);
+                ctx.rotate(angle);
+                ctx.fillStyle = '#10b981';
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(25, 0);
+                ctx.lineTo(-10, -12);
+                ctx.lineTo(-5, 0);
+                ctx.lineTo(-10, 12);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        // --- DIBUJO DE SOMBREROS ESTILIZADOS ---
+        function drawEntityHat(hat, r) {
+            ctx.save();
+            ctx.translate(0, -r + 2); 
+
+            if (hat === 'crown') {
+                ctx.fillStyle = '#fbbf24';
+                ctx.strokeStyle = '#d97706';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(-12, 0);
+                ctx.lineTo(-12, -10);
+                ctx.lineTo(-6, -4);
+                ctx.lineTo(0, -14);
+                ctx.lineTo(6, -4);
+                ctx.lineTo(12, -10);
+                ctx.lineTo(12, 0);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.arc(-12, -10, 1.8, 0, Math.PI*2);
+                ctx.arc(0, -14, 1.8, 0, Math.PI*2);
+                ctx.arc(12, -10, 1.8, 0, Math.PI*2);
+                ctx.fill();
+            } 
+            else if (hat === 'cowboy') {
+                ctx.fillStyle = '#78350f';
+                ctx.strokeStyle = '#451a03';
+                ctx.lineWidth = 2;
+                
+                ctx.beginPath();
+                ctx.ellipse(0, 0, 18, 4, 0, 0, Math.PI*2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(-10, 0);
+                ctx.quadraticCurveTo(-11, -12, -8, -12);
+                ctx.quadraticCurveTo(0, -15, 8, -12);
+                ctx.quadraticCurveTo(11, -12, 10, 0);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(-9, -3, 18, 3);
+            } 
+            else if (hat === 'tophat') {
+                ctx.fillStyle = '#1e293b';
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 1.5;
+
+                ctx.beginPath();
+                ctx.ellipse(0, 0, 16, 3, 0, 0, Math.PI*2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillRect(-10, -18, 20, 18);
+                ctx.strokeRect(-10, -18, 20, 18);
+
+                ctx.fillStyle = '#ef4444';
+                ctx.fillRect(-10, -4, 20, 4);
+            } 
+            else if (hat === 'cap') {
+                ctx.fillStyle = '#3b82f6';
+                ctx.strokeStyle = '#1d4ed8';
+                ctx.lineWidth = 1.5;
+
+                ctx.beginPath();
+                ctx.arc(0, 0, 12, Math.PI, 0);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#1e3a8a';
+                ctx.fillRect(0, -3, 16, 4);
+            } 
+            else if (hat === 'beret') {
+                ctx.fillStyle = '#dc2626';
+                ctx.strokeStyle = '#991b1b';
+                ctx.lineWidth = 1.5;
+
+                ctx.beginPath();
+                ctx.ellipse(-2, -2, 14, 5, -0.15, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(-2, -6);
+                ctx.lineTo(-3, -10);
+                ctx.stroke();
+            } 
+            else if (hat === 'chef') {
+                ctx.fillStyle = '#f8fafc';
+                ctx.strokeStyle = '#cbd5e1';
+                ctx.lineWidth = 1.5;
+
+                ctx.beginPath();
+                ctx.moveTo(-10, 0);
+                ctx.lineTo(-10, -10);
+                ctx.bezierCurveTo(-14, -22, 14, -22, 10, -10);
+                ctx.lineTo(10, 0);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            } 
+            else if (hat === 'horns') {
+                ctx.fillStyle = '#e2e8f0';
+                ctx.strokeStyle = '#64748b';
+                ctx.lineWidth = 1.5;
+
+                ctx.beginPath();
+                ctx.moveTo(-8, 2);
+                ctx.quadraticCurveTo(-18, -2, -18, -12);
+                ctx.quadraticCurveTo(-12, -4, -4, 0);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(8, 2);
+                ctx.quadraticCurveTo(18, -2, 18, -12);
+                ctx.quadraticCurveTo(12, -4, 4, 0);
+                ctx.fill();
+                ctx.stroke();
+            } 
+            else if (hat === 'party') {
+                ctx.fillStyle = '#f43f5e';
+                ctx.strokeStyle = '#be123c';
+                ctx.lineWidth = 1.5;
+
+                ctx.beginPath();
+                ctx.moveTo(-10, 0);
+                ctx.lineTo(0, -22);
+                ctx.lineTo(10, 0);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.strokeStyle = '#facc15';
+                ctx.beginPath();
+                ctx.moveTo(-5, -6);
+                ctx.lineTo(5, -12);
+                ctx.stroke();
+
+                ctx.fillStyle = '#facc15';
+                ctx.beginPath();
+                ctx.arc(0, -23, 3.5, 0, Math.PI*2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        // RENDERIZADO CON OJOS DE ÓVALO VERTICAL BFDI Y PIERNAS DE STICKMAN (SURVIVOR)
+        function drawSurvivorEntity(entity) {
+            ctx.save();
+            ctx.translate(entity.x, entity.y);
+            
+            // ROTACIÓN: ÚNICA Y EXCLUSIVAMENTE ACTIVA DURANTE EL RODAMIENTO (rollTimer > 0)
+            if (entity.rollTimer && entity.rollTimer > 0) {
+                ctx.rotate((entity.x * 0.12) * entity.faceDir);
+            }
+
+            const grad = ctx.createRadialGradient(-entity.r * 0.2, -entity.r * 0.2, entity.r * 0.1, 0, 0, entity.r);
+            grad.addColorStop(0, '#f8fafc');
+            grad.addColorStop(1, '#94a3b8');
+
+            ctx.beginPath();
+            ctx.arc(0, 0, entity.r, 0, Math.PI * 2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#1e293b';
+            ctx.stroke();
+
+            if (entity.hatStyle) {
+                drawEntityHat(entity.hatStyle, entity.r);
+            }
+
+            ctx.fillStyle = '#64748b';
+            const textureDimples = [
+                {x: -10, y: -6}, {x: -2, y: -11}, {x: 7, y: -8},
+                {x: -11, y: 2}, {x: 0, y: -1}, {x: 10, y: 1},
+                {x: -7, y: 9}, {x: 3, y: 7}, {x: 8, y: 9}
+            ];
+            textureDimples.forEach(d => {
+                ctx.beginPath();
+                ctx.arc(d.x, d.y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            if (entity.state === 'DOWN') {
+                ctx.strokeStyle = '#ef4444';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(-7, -6); ctx.lineTo(-2, 0);
+                ctx.moveTo(-2, -6); ctx.lineTo(-8, 0);
+                ctx.moveTo(2, -6); ctx.lineTo(8, 0);
+                ctx.moveTo(8, -6); ctx.lineTo(2, 0);
+                ctx.stroke();
+
+                ctx.strokeStyle = '#1e293b';
+                ctx.beginPath();
+                ctx.arc(0, 6, 4, 0, Math.PI, true);
+                ctx.stroke();
+
+                // Dibujar indicador visual de recarga / campeo sobre el personaje caído
+                // El indicador cambia de color si es recarga universal de down o pasiva de Golf Ball cargando
+                const activeKiller = currentRole === 'survivor' ? killer : player;
+                const distToMecha = Math.hypot(entity.x - activeKiller.x, entity.y - activeKiller.y);
+
+                if (distToMecha < 160) {
+                    ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+                    ctx.fillRect(-22, -entity.r - 28, 44, 6);
+                    
+                    // Si es Golf Ball, muestra carga de pasiva. Si es otro, muestra recarga universal de downTimer
+                    if (entity.name.includes("Golf Ball")) {
+                        const pct = (entity.campTimer || 0) / 150;
+                        ctx.fillStyle = '#06b6d4'; 
+                        ctx.fillRect(-22, -entity.r - 28, 44 * pct, 6);
+                        ctx.fillStyle = '#22d3ee';
+                        ctx.font = 'bold 8px monospace';
+                        ctx.textAlign = 'center';
+                        ctx.fillText("ESCUDO CARGANDO", 0, -entity.r - 33);
+                    } else {
+                        ctx.fillStyle = '#10b981'; 
+                        ctx.fillRect(-22, -entity.r - 28, 44, 6); // Llena la barra al máximo para indicar protección
+                        ctx.fillStyle = '#34d399';
+                        ctx.font = 'bold 8px monospace';
+                        ctx.textAlign = 'center';
+                        ctx.fillText("BATERÍA BLOQUEADA", 0, -entity.r - 33);
+                    }
+                }
+            } else {
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.ellipse(-5, -2, 2.5, 6, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.ellipse(5, -2, 2.5, 6, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 2.0;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(-8, -10);
+                ctx.lineTo(-2, -8);
+                ctx.moveTo(2, -8);
+                ctx.lineTo(8, -10);
+                ctx.stroke();
+
+                ctx.strokeStyle = '#1e293b';
+                ctx.beginPath();
+                ctx.moveTo(-4, 5); ctx.lineTo(4, 5);
+                ctx.stroke();
+            }
+
+            if (entity.burnTimer > 0) {
+                ctx.fillStyle = 'rgba(249, 115, 22, 0.4)';
+                ctx.beginPath();
+                ctx.arc(0, -5, entity.r * 0.8, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // PATAS DE STICKMAN: Mueven con walkOffset pero manteniéndose estables (sin rotar todo el cuerpo)
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            
+            ctx.beginPath();
+            ctx.moveTo(-5, entity.r - 2);
+            const walkOffset = (entity.vx !== 0 && entity.onGround && !entity.isRolling) ? Math.sin(entity.x * 0.25) * 6 : 0;
+            ctx.lineTo(-7 + walkOffset, entity.r + 8);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(5, entity.r - 2);
+            ctx.lineTo(7 - walkOffset, entity.r + 8);
+            ctx.stroke();
+
+            ctx.fillStyle = '#fff';
+            ctx.font = '10px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(entity.name, 0, -entity.r - 12);
+
+            if (entity.buildingSpeedpadTimer > 0) {
+                const totalBuildTime = 90; 
+                const progressRatio = (totalBuildTime - entity.buildingSpeedpadTimer) / totalBuildTime;
+                
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+                ctx.fillRect(-22, -entity.r - 28, 44, 6);
+                ctx.fillStyle = '#38bdf8';
+                ctx.fillRect(-22, -entity.r - 28, 44 * progressRatio, 6);
+            }
+
+            // RENDERIZAR EMOTE COSMÉTICO ACTIVO
+            if (entity.emoteTimer && entity.emoteTimer > 0 && entity.activeEmote) {
+                drawSpeechEmote(entity.activeEmote, entity.r);
+            }
+
+            ctx.restore();
+        }
+
+        // RENDERIZADO DEL ASESINO (MECHA GOLF BALL)
+        function drawKillerEntity(entity) {
+            ctx.save();
+            ctx.translate(entity.x, entity.y);
+
+            const grad = ctx.createRadialGradient(-entity.r * 0.2, -entity.r * 0.2, entity.r * 0.1, 0, 0, entity.r);
+            grad.addColorStop(0, '#475569');
+            grad.addColorStop(1, '#0f172a');
+
+            ctx.beginPath();
+            ctx.arc(0, 0, entity.r, 0, Math.PI * 2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#1e293b';
+            ctx.stroke();
+
+            ctx.fillStyle = '#ef4444';
+            const mechDimples = [
+                {x: -12, y: -8}, {x: 10, y: -10}, {x: -14, y: 5}, {x: 12, y: 8}
+            ];
+            mechDimples.forEach(d => {
+                ctx.beginPath();
+                ctx.arc(d.x, d.y, 3, 0, Math.PI*2);
+                ctx.fill();
+            });
+
+            // Ojos robóticos estilo BFDI pero de color neón brillante
+            ctx.fillStyle = '#0f172a'; 
+            ctx.beginPath();
+            ctx.ellipse(-6, -2, 4.5, 8.5, 0, 0, Math.PI * 2);
+            ctx.ellipse(6, -2, 4.5, 8.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            // Pupilas de óvalo rojo neón brillante
+            ctx.fillStyle = '#ff3333';
+            ctx.beginPath();
+            ctx.ellipse(-6, -2, 2.5, 6, 0, 0, Math.PI * 2);
+            ctx.ellipse(6, -2, 2.5, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Brillo interno blanco
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.ellipse(-5, -4, 1, 2.5, 0, 0, Math.PI * 2);
+            ctx.ellipse(7, -4, 1, 2.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Boca mecánica lineal rígida
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(-6, 7);
+            ctx.lineTo(6, 7);
+            ctx.stroke();
+
+            // Rejilla de altavoz o placa inferior
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(-10, 10, 20, 5);
+            ctx.strokeStyle = '#475569';
+            ctx.strokeRect(-10, 10, 20, 5);
+
+            // Antena superior
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, -entity.r);
+            ctx.lineTo(0, -entity.r - 12);
+            ctx.stroke();
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(0, -entity.r - 12, 4, 0, Math.PI*2);
+            ctx.fill();
+
+            // Patas de robot stickman (Mueven con balanceo estable sin rotación esférica)
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            const robotWalkOffset = (entity.vx !== 0 && entity.onGround) ? Math.sin(entity.x * 0.2) * 5 : 0;
+            ctx.moveTo(-6, entity.r - 2);
+            ctx.lineTo(-8 + robotWalkOffset, entity.r + 9);
+            ctx.moveTo(6, entity.r - 2);
+            ctx.lineTo(8 - robotWalkOffset, entity.r + 9);
+            ctx.stroke();
+
+            ctx.fillStyle = '#f87171';
+            ctx.font = '10px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(entity.name, 0, -entity.r - 18);
+
+            if (entity.fireBlastCharge && entity.fireBlastCharge > 0) {
+                const ratio = (120 - entity.fireBlastCharge) / 120;
+                ctx.fillStyle = 'rgba(239, 68, 68, 0.2)';
+                ctx.fillRect(-20, -entity.r - 28, 40, 5);
+                ctx.fillStyle = '#ef4444';
+                ctx.fillRect(-20, -entity.r - 28, 40 * ratio, 5);
+            }
+
+            // RENDERIZAR EMOTE COSMÉTICO ACTIVO
+            if (entity.emoteTimer && entity.emoteTimer > 0 && entity.activeEmote) {
+                drawSpeechEmote(entity.activeEmote, entity.r + 5);
+            }
+
+            ctx.restore();
+        }
+
+        // DIBUJO DE BURBUJAS DE EMOTE COSMÉTICO
+        function drawSpeechEmote(type, r) {
+            ctx.save();
+            ctx.translate(0, -r - 35);
+
+            // Globo de diálogo
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+            ctx.strokeStyle = type === 'calculation' ? '#10b981' : '#ef4444';
+            ctx.lineWidth = 2;
+            
+            // Cuerpo del globo
+            ctx.beginPath();
+            ctx.roundRect(-42, -18, 84, 25, 8);
+            ctx.fill();
+            ctx.stroke();
+
+            // Pico del globo
+            ctx.beginPath();
+            ctx.moveTo(-6, 7);
+            ctx.lineTo(0, 14);
+            ctx.lineTo(6, 7);
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+            ctx.fill();
+            ctx.stroke();
+
+            // Texto o simbología interna
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 9px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            if (type === 'calculation') {
+                ctx.fillStyle = '#34d399';
+                ctx.fillText("? + % = 💡", 0, -5);
+            } else {
+                ctx.fillStyle = '#f87171';
+                ctx.fillText("😈 LAUGH.EXE", 0, -5);
+            }
+
+            ctx.restore();
+        }
+
+        function updateCooldownsUI() {
+            activeSkills.forEach(skill => {
+                const btn = document.getElementById(`btn-skill-${skill.id}`);
+                const cdText = document.getElementById(`cd-text-${skill.id}`);
+                const iconBox = document.getElementById(`icon-${skill.id}`);
+
+                if (!btn) return;
+
+                if (skill.cd > 0) {
+                    btn.classList.add('opacity-50');
+                    if (iconBox) iconBox.classList.add('text-slate-600');
+                    if (cdText) {
+                        cdText.classList.remove('opacity-0');
+                        cdText.innerText = `${Math.ceil(skill.cd)}s`;
+                    }
+                } else {
+                    btn.classList.remove('opacity-50');
+                    if (iconBox) iconBox.classList.remove('text-slate-600');
+                    if (cdText) cdText.classList.add('opacity-0');
+                }
+            });
+
+            const healthPercent = Math.max(0, player.health);
+            const hpBar = document.getElementById('player-hp-bar');
+            
+            if (currentRole === 'killer') {
+                document.getElementById('hp-label').innerText = "POTENCIA MECHA:";
+                hpBar.style.width = `${Math.max(0, player.health)}%`;
+                document.getElementById('player-hp-text').innerText = `${Math.ceil(player.health)}%`;
+            } else {
+                document.getElementById('hp-label').innerText = "BATERÍA G.B.:";
+                if (player.lmsBuff) {
+                    hpBar.style.width = `${Math.min(100, (player.health / 200) * 100)}%`;
+                    document.getElementById('player-hp-text').innerText = `${Math.ceil(player.health)} / 200 (LMS)`;
+                } else {
+                    hpBar.style.width = `${Math.min(100, healthPercent)}%`;
+                    document.getElementById('player-hp-text').innerText = `${Math.ceil(player.health)} / 100`;
+                }
+            }
+        }
+
+        function updateSurvivorsHudList() {
+            const listContainer = document.getElementById('survivors-hud-list');
+            if (!listContainer) return;
+            listContainer.innerHTML = '';
+
+            const allSuvs = currentRole === 'survivor' ? survivors.concat([player]) : survivors;
+            const activeKiller = currentRole === 'survivor' ? killer : player;
+
+            allSuvs.forEach(s => {
+                const inTerrorRadius = Math.hypot(s.x - activeKiller.x, s.y - activeKiller.y) < 700;
+                
+                const item = document.createElement('div');
+                item.className = "flex items-center justify-end gap-1.5 md:gap-2 pointer-events-none";
+
+                let circleClass = "w-8 h-8 rounded-full bg-white text-slate-950 flex flex-col items-center justify-center font-black text-[9px] border border-slate-700 transition-all duration-100 shadow-md";
+                if (s.state === 'DOWN') {
+                    circleClass = "w-8 h-8 rounded-full border-2 border-amber-500 bg-amber-100 animate-pulse text-amber-900 flex flex-col items-center justify-center font-black text-[9px]";
+                } else if (s.state === 'DEAD') {
+                    circleClass = "w-8 h-8 rounded-full border border-red-800 bg-red-950/90 text-red-400 flex flex-col items-center justify-center font-black text-[9px]";
+                } else if (inTerrorRadius) {
+                    circleClass = "w-8 h-8 rounded-full bg-red-600 text-white animate-bounce border-2 border-red-400 flex flex-col items-center justify-center font-black text-[9px]";
+                }
+
+                item.innerHTML = `
+                    <span class="text-[8px] md:text-[9px] font-mono text-slate-300 bg-slate-900/60 px-1 rounded">${s.name}</span>
+                    <div class="${circleClass}">
+                        <span>${s.state === 'DEAD' ? 'X' : Math.ceil(s.health)}</span>
+                        <span class="text-[6px] font-normal leading-none">${s.lives}v</span>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        function endGame(won, message) {
+            gameActive = false;
+            if (synthBgmInterval) clearInterval(synthBgmInterval);
+            if (lmsSynthInterval) clearInterval(lmsSynthInterval);
+
+            // Ocultar elementos del HUD táctil
+            document.getElementById('game-hud-header').classList.add('hidden');
+            document.getElementById('survivors-hud-list').classList.add('hidden');
+            document.getElementById('mobile-controls-container').classList.add('hidden');
+
+            const screen = document.getElementById('results-screen');
+            const title = document.getElementById('results-title');
+            const msg = document.getElementById('results-message');
+
+            if (won) {
+                title.innerText = "¡SIMULACIÓN RESUELTA!";
+                title.className = "text-4xl font-black text-emerald-500 mb-2 tracking-wide";
+                msg.innerHTML = `${message}<br><br><span class="text-xs text-slate-500 font-mono">Los datos de la simulación de supervivencia han sido guardados.</span>`;
+            } else {
+                title.innerText = "¡MÓDULO INTERRUMPIDO!";
+                title.className = "text-4xl font-black text-red-500 mb-2 tracking-wide";
+                msg.innerHTML = `${message}<br><br><span class="text-xs text-slate-500 font-mono">Los sistemas fallaron. Inténtalo de nuevo con otra estrategia.</span>`;
+            }
+
+            screen.classList.remove('scale-0', 'opacity-0', 'pointer-events-none');
+            screen.classList.add('scale-100', 'opacity-100');
+        }
+
+        function loop() {
+            updateGame();
+            draw();
+            updateCooldownsUI();
+            requestAnimationFrame(loop);
+        }
+
+        // --- GESTIÓN Y RENDERIZADO DEL MENÚ DE CONFIGURACIÓN ---
+        function buildHatSelectionGrid() {
+            const grid = document.getElementById('hat-selection-grid');
+            grid.innerHTML = '';
+
+            HAT_TYPES.forEach(hat => {
+                const isSelected = (hat === chosenPlayerHat);
+                const btn = document.createElement('button');
+                btn.className = `p-2.5 rounded-xl border text-xs font-mono font-bold flex flex-col items-center justify-center transition-all ${
+                    isSelected 
+                    ? 'bg-cyan-950/80 border-cyan-400 text-cyan-300 scale-105 shadow-[0_0_10px_rgba(34,211,238,0.2)]' 
+                    : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-750'
+                }`;
+                
+                btn.innerHTML = `
+                    <span class="text-xl mb-1">${getHatEmoji(hat)}</span>
+                    <span class="text-[9px] truncate max-w-[80px]">${HAT_NAMES[hat]}</span>
+                `;
+
+                btn.addEventListener('click', () => {
+                    chosenPlayerHat = hat;
+                    playSound('boost');
+                    buildHatSelectionGrid(); 
+                });
+
+                grid.appendChild(btn);
+            });
+        }
+
+        function getHatEmoji(hat) {
+            switch(hat) {
+                case 'crown': return '👑';
+                case 'cowboy': return '🤠';
+                case 'tophat': return '🎩';
+                case 'cap': return '🧢';
+                case 'beret': return '🧣';
+                case 'chef': return '🍳';
+                case 'horns': return '😈';
+                case 'party': return '🎉';
+                default: return '🎩';
+            }
+        }
+
+        // --- CONTROLADORES DE LOS BOTONES DE ALINEACIÓN DE CONTROLES TÁCTILES ---
+        const btnAlignLeft = document.getElementById('ctrl-align-left');
+        const btnAlignRight = document.getElementById('ctrl-align-right');
+        const controlsContainer = document.getElementById('mobile-controls-container');
+
+        btnAlignLeft.addEventListener('click', () => {
+            controlsInverted = false;
+            controlsContainer.classList.remove('flex-row-reverse');
+            btnAlignLeft.className = "bg-slate-850 hover:bg-slate-800 border-2 border-cyan-500 text-cyan-300 font-bold py-2 rounded-xl text-xs font-mono transition-all";
+            btnAlignRight.className = "bg-slate-800 hover:bg-slate-750 border-2 border-slate-800 text-slate-400 font-bold py-2 rounded-xl text-xs font-mono transition-all";
+            playSound('jump');
+        });
+
+        btnAlignRight.addEventListener('click', () => {
+            controlsInverted = true;
+            controlsContainer.classList.add('flex-row-reverse');
+            btnAlignRight.className = "bg-slate-850 hover:bg-slate-800 border-2 border-cyan-500 text-cyan-300 font-bold py-2 rounded-xl text-xs font-mono transition-all";
+            btnAlignLeft.className = "bg-slate-800 hover:bg-slate-750 border-2 border-slate-800 text-slate-400 font-bold py-2 rounded-xl text-xs font-mono transition-all";
+            playSound('jump');
+        });
+
+        // --- MANEJO DE CONTROLADORES DEL MENÚ DE CONFIGURACIÓN ---
+        document.getElementById('btn-open-settings').addEventListener('click', () => {
+            buildHatSelectionGrid();
+            document.getElementById('settings-modal').classList.remove('hidden');
+            playSound('boost');
+        });
+
+        document.getElementById('btn-close-settings').addEventListener('click', () => {
+            document.getElementById('settings-modal').classList.add('hidden');
+            playSound('laser');
+        });
+
+        // MANEJO DE MODAL DE BIOGRAFÍAS
+        document.getElementById('btn-open-bio').addEventListener('click', () => {
+            document.getElementById('bio-modal').classList.remove('hidden');
+            playSound('boost');
+        });
+
+        document.getElementById('btn-close-bio').addEventListener('click', () => {
+            document.getElementById('bio-modal').classList.add('hidden');
+            playSound('laser');
+        });
+
+        // Control de volumen deslizable (Permite hasta 300%)
+        const sliderVolume = document.getElementById('slider-volume');
+        const volumeValDisplay = document.getElementById('volume-val-display');
+
+        sliderVolume.addEventListener('input', (e) => {
+            const val = e.target.value;
+            volumeValDisplay.innerText = `${val}%`;
+            setAudioVolume(val / 100);
+        });
+
+        // Vinculaciones de inicio de juego
+        document.getElementById('select-survivor').addEventListener('click', () => initGame('survivor'));
+        document.getElementById('select-killer').addEventListener('click', () => initGame('killer'));
+        
+        document.getElementById('btn-play-again').addEventListener('click', () => {
+            const resultsScreen = document.getElementById('results-screen');
+            resultsScreen.classList.remove('scale-100', 'opacity-100');
+            resultsScreen.classList.add('scale-0', 'opacity-0', 'pointer-events-none');
+            
+            // Ocultar HUD y volver al Lobby
+            document.getElementById('game-hud-header').classList.add('hidden');
+            document.getElementById('survivors-hud-list').classList.add('hidden');
+            document.getElementById('mobile-controls-container').classList.add('hidden');
+            
+            document.getElementById('lobby-screen').classList.remove('hidden');
+        });
+
+        window.onload = () => {
+            player = { x: 300, y: WORLD_HEIGHT - 120, r: 20, vy: 0, vx: 0, name: "Menú", state: 'NORMAL', hatStyle: HAT_TYPES[0] };
+            killer = { x: WORLD_WIDTH - 200, y: WORLD_HEIGHT - 120, r: 26, vy: 0, vx: 0, name: "Mecha", hatStyle: null };
+            resizeCanvas();
+            loop(); 
+        };
+    </script>
+</body>
+</html>
