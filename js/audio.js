@@ -221,6 +221,18 @@
                 }
             });
         }
+function playLobbyTrack() {
+    stopAllRealTracks();
+
+    lobbyTrackEl = loadAudioWithFallback(['Lobby.mp3'], (el) => {
+        if (!el) return;
+
+        lobbyTrackEl = el;
+        el.loop = true;
+        el.volume = globalVolume;
+        el.play().catch(() => {});
+    });
+}
 
         function stopLmsBgmReal() {
             if (lmsTrackEl) { try { lmsTrackEl.pause(); } catch (e) {} }
