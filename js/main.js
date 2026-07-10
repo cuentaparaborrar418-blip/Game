@@ -713,7 +713,7 @@
 
         function loop() { updateGame(); draw(); updateCooldownsUI(); requestAnimationFrame(loop); }
 
-window.onload = () => {
+        window.onload = () => {
             currentMap = MAPS[0];
             WORLD_WIDTH = currentMap.WORLD_WIDTH; WORLD_HEIGHT = currentMap.WORLD_HEIGHT;
             platforms = currentMap.platforms.map(p => ({ ...p }));
@@ -721,7 +721,6 @@ window.onload = () => {
             killer = { x: WORLD_WIDTH - 200, y: WORLD_HEIGHT - 120, r: 26, vy: 0, vx: 0, name: "Killer", hatStyle: null, abilities: [] };
             
             resizeCanvas();
-            loop();
 
             // =========================================================
             // CONTROL AUTOMÁTICO DE LA MÚSICA DEL LOBBY (Lobby.mp3)
@@ -755,6 +754,9 @@ window.onload = () => {
                     playLobbyTrack();
                 }
             });
-        };
 
-        
+            // =========================================================
+            // INICIO DEL LOOP (Debe ir al final para no bloquear los eventos)
+            // =========================================================
+            loop(); 
+        };
