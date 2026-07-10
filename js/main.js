@@ -142,7 +142,8 @@
             document.getElementById('character-select-modal').classList.add('hidden');
 
             buildAbilityButtons();
-            startBgmSystem();
+           stopAllRealTracks();
+                startBgmSystem();
 
             resizeCanvas();
             camera.x = player.x - canvas.width / 2;
@@ -719,6 +720,7 @@
             platforms = currentMap.platforms.map(p => ({ ...p }));
             player = { x: 300, y: WORLD_HEIGHT - 120, r: 20, vy: 0, vx: 0, name: "Menú", state: 'NORMAL', hatStyle: HAT_TYPES[0], abilities: [] };
             killer = { x: WORLD_WIDTH - 200, y: WORLD_HEIGHT - 120, r: 26, vy: 0, vx: 0, name: "Killer", hatStyle: null, abilities: [] };
-            resizeCanvas();
+            playLobbyTrack();
+        resizeCanvas();
             loop();
         };
