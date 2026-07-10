@@ -157,7 +157,7 @@
 
         // Preload the LMS track (Golf Ball's) purely to compute the dynamic LMS timer duration,
         // independent of which character ends up in LMS mode.
-        loadAudioWithFallback(['audio/GolfballLms.mp3'], (el) => {
+        loadAudioWithFallback(['GolfballLms.mp3'], (el) => {
             if (el && el.duration && isFinite(el.duration)) {
                 lmsTimerSeconds = Math.max(30, Math.round(el.duration - LMS_NEGATIVE_OFFSET));
             }
@@ -169,8 +169,8 @@
             stopAllRealTracks();
 
             const capName = CHAR_AUDIO_NAME[characterId] || 'Golfball';
-            const candidates = [`audio/${capName}Lms.mp3`];
-            if (capName !== 'Golfball') candidates.push('audio/GolfballLms.mp3');
+            const candidates = [`${capName}Lms.mp3`];
+            if (capName !== 'Golfball') candidates.push('GolfballLms.mp3');
 
             lmsTrackEl = loadAudioWithFallback(candidates, (el) => {
                 if (!el) return; // no file worked at all -> silence, per design (no synth fallback for LMS)
@@ -184,7 +184,7 @@
 
         function startChaseTheme(characterId) {
             const capName = CHAR_AUDIO_NAME[characterId] || 'Golfball';
-            chaseTrackEl = loadAudioWithFallback([`audio/Mecha-${capName}ChTh.mp3`], (el) => {
+            chaseTrackEl = loadAudioWithFallback([`Mecha-${capName}ChTh.mp3`], (el) => {
                 if (el) { chaseTrackEl = el; el.loop = true; el.volume = 0; }
             });
         }
