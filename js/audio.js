@@ -11,7 +11,7 @@
         function setAudioVolume(volumeFraction) {
             globalVolume = volumeFraction;
             masterGain.gain.setValueAtTime(globalVolume, audioCtx.currentTime);
-            [lmsTrackEl, soloWinTrackEl, endScreenTrackEl].forEach(t => { if (t) t.volume = globalVolume; });
+            [lmsTrackEl, soloWinTrackEl, endScreenTrackEl, lobbyTrackEl].forEach(t => { if (t) t.volume = globalVolume; });
         }
 
         function playSound(type) {
@@ -123,6 +123,7 @@
         let chaseTrackEl = null;
         let soloWinTrackEl = null;
         let endScreenTrackEl = null;
+        let lobbyTrackEl = null;
         let lmsTimerSeconds = DEFAULT_LMS_SECONDS;
 
         function loadAudioWithFallback(candidates, onResolved) {
@@ -150,7 +151,7 @@
         function getLmsTimerSeconds() { return lmsTimerSeconds; }
 
         function stopAllRealTracks() {
-            [lmsTrackEl, chaseTrackEl, soloWinTrackEl, endScreenTrackEl].forEach(t => {
+            [lmsTrackEl, chaseTrackEl, soloWinTrackEl, endScreenTrackEl, lobbyTrackEl].forEach(t => {
                 if (t) { try { t.pause(); t.currentTime = 0; } catch (e) {} }
             });
         }
