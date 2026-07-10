@@ -723,34 +723,42 @@
             resizeCanvas();
 
             // =========================================================
-            // CONTROL AUTOMÁTICO DE LA MÚSICA DEL LOBBY (Lobby.mp3)
+            // CONTROL AUTOMÁTICO DE LA MÚSICA DEL LOBBY (audio.js)
             // =========================================================
 
-            // 1. INICIAR: Despierta el motor de audio del juego y reproduce el Lobby al primer clic
-            document.addEventListener('click', () => {
+            // Función auxiliar para forzar la reproducción y forzar el canal de audioCtx
+            function arrancarMusicaConPermiso() {
                 const lobby = document.getElementById('lobby-screen');
                 if (lobby && !lobby.classList.contains('hidden')) {
-                    // Despertamos el AudioContext del juego usando tu lógica original
+                    // 1. Forzar el encendido del motor de audio principal
                     if (typeof audioCtx !== 'undefined' && audioCtx.state === 'suspended') {
                         audioCtx.resume();
                     }
-                    // Ejecutamos la pista del lobby
+                    // 2. Ejecutar un sonido fantasma corto para forzar el desbloqueo del navegador
+                    if (typeof playSound === 'function') {
+                        playSound('click'); 
+                    }
+                    // 3. Lanzar la música del lobby
                     if (typeof playLobbyTrack === 'function') {
                         playLobbyTrack();
                     }
                 }
-            }, { once: true });
+            }
 
-            // 2. PARAR: Limpia y detiene todas las canciones del menú cuando eligen bando para jugar
+            // INICIAR: Escucha el primer clic, o movimiento de mouse, o tecla en la pantalla
+            document.addEventListener('click', arrancarMusicaConPermiso, { once: true });
+            document.addEventListener('keydown', arrancarMusicaConPermiso, { once: true });
+
+            // PARAR: Detiene la música usando la función de limpieza de tu audio.js
             function apagarMusicaMenu() {
                 if (typeof stopAllRealTracks === 'function') {
-                    stopAllRealTracks(); // Función nativa de tu audio.js para apagar todo
+                    stopAllRealTracks(); 
                 }
             }
             document.getElementById('menu-survivor')?.addEventListener('click', apagarMusicaMenu);
             document.getElementById('menu-killer')?.addEventListener('click', apagarMusicaMenu);
 
-            // 3. REPETIR: Vuelve a encenderse cuando regresan de la partida haciendo clic en "Volver al Lobby"
+            // REPETIR: Vuelve a encenderse al regresar al lobby
             document.getElementById('btn-play-again')?.addEventListener('click', () => {
                 if (typeof playLobbyTrack === 'function') {
                     playLobbyTrack();
@@ -758,7 +766,7 @@
             });
 
             // =========================================================
-            // INICIO DEL LOOP
+            // INICIO DEL LOOP (Al final para no congelar los listeners)
             // =========================================================
             loop(); 
         };
